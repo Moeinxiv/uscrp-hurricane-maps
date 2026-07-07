@@ -59,11 +59,13 @@
     <div class="seg" id="scenseg">
       <button data-scen="historical" class="active">Historical</button>
       <button data-scen="future">Future</button>
+      <button data-scen="diff" title="Future minus Historical peak depth">Δ Fut−Hist</button>
     </div>
   </div>
   <div class="grp"><div class="lbl">Variable</div>
     <div class="seg" id="varseg">
-      <button data-var="depth" class="active">Inundation</button>
+      <button data-var="depth" class="active">Depth</button>
+      <button data-var="rise">Rise</button>
       <button data-var="wind">Wind</button>
     </div>
   </div>
@@ -107,14 +109,20 @@
 const DATA_DIR="data/frames/";
 const EVENTS=["harvey","rita","ike"];
 const SCENARIOS=["historical","future"];
-const VARS=["depth","wind"];
+const VARS=["depth","rise","wind"];
 const BOUNDS=[[28.974991429868123,-94.33611991576419],[30.227087808884963,-93.48667298310077]];
 const DEPTH_RAMP=[[0.1,1,[70,98,216]],[1,2,[53,171,248]],[2,3,[27,229,181]],[3,4,[116,254,93]],
   [4,5,[201,239,52]],[5,7.5,[251,185,56]],[7.5,10,[245,105,24]],[10,15,[201,41,3]],[15,99,[122,4,3]]];
 const WIND_RAMP=[[0,8,[237,248,251]],[8,17,[179,205,227]],[17,25,[140,150,198]],[25,33,[136,86,167]],
   [33,43,[129,15,124]],[43,50,[255,178,76]],[50,58,[253,141,60]],[58,70,[240,59,32]],[70,99,[189,0,38]]];
-const VARDEF={depth:{ramp:DEPTH_RAMP,units:'m',legend:'Inundation depth (m)'},
-              wind:{ramp:WIND_RAMP,units:'m/s',legend:'Wind speed (m/s)'}};
+const RISE_RAMP=[[0.05,0.1,[215,235,255]],[0.1,0.2,[170,205,245]],[0.2,0.3,[110,170,230]],[0.3,0.4,[60,180,170]],
+  [0.4,0.5,[120,205,90]],[0.5,0.75,[215,215,70]],[0.75,1.0,[250,170,55]],[1.0,1.5,[240,110,45]],[1.5,99,[200,40,40]]];
+const DIFF_RAMP=[[-99,-0.5,[33,102,172]],[-0.5,-0.2,[103,169,207]],[-0.2,-0.05,[180,210,235]],
+  [0.05,0.2,[250,200,170]],[0.2,0.5,[239,138,98]],[0.5,99,[178,24,43]]];
+const VARDEF={depth:{ramp:DEPTH_RAMP,units:'m',legend:'Water depth (m)'},
+              rise:{ramp:RISE_RAMP,units:'m',legend:'Water rise (m)'},
+              wind:{ramp:WIND_RAMP,units:'m/s',legend:'Wind speed (m/s)'},
+              diff:{ramp:DIFF_RAMP,units:'m',legend:'Future − Historical (m)',diverging:true}};
 
 const map=L.map('map',{zoomControl:true}).fitBounds(BOUNDS);
 L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}{r}.png',
@@ -138,14 +146,20 @@ hImg.crossOrigin='anonymous';
 hImg.onload=()=>{ hcanvas.width=hImg.naturalWidth; hcanvas.height=hImg.naturalHeight;
   hctx=hcanvas.getContext('2d',{willReadFrequently:true}); hctx.drawImage(hImg,0,0); hReady=true; };
 
+function effVar(){ return scen==='diff' ? 'diff' : curVar; }
 function drawLegend(){
-  el('legTitle').textContent=VARDEF[curVar].legend;
-  el('legRows').innerHTML=VARDEF[curVar].ramp.map(([lo,hi,c])=>{
-    const lbl=hi>=99?`> ${lo}`:`${lo} – ${hi}`;
+  const def=VARDEF[effVar()];
+  el('legTitle').textContent=def.legend;
+  el('legRows').innerHTML=def.ramp.map(([lo,hi,c])=>{
+    let lbl;
+    if(def.diverging){ lbl = lo<=-99?`< ${hi}` : (hi>=99?`> +${lo}` : `${lo} … ${hi}`); }
+    else { lbl = hi>=99?`> ${lo}`:`${lo} – ${hi}`; }
     return `<div class="row"><span class="sw" style="background:rgb(${c})"></span>${lbl}</div>`;}).join('');
 }
-function key(){ return `${ev}_${scen}`; }
-function curSet(){ return store[key()] && store[key()][curVar]; }
+function curSet(){
+  if(scen==='diff'){ return store[`${ev}_diff`] && store[`${ev}_diff`]['diff']; }
+  return store[`${ev}_${scen}`] && store[`${ev}_${scen}`][curVar];
+}
 function showFrame(i){
   const set=curSet(); if(!set||!set.frames.length){ overlay.setUrl(''); el('tlabel').textContent='no data'; return; }
   idx=Math.max(0,Math.min(i,set.frames.length-1));
@@ -168,11 +182,12 @@ function seg(id,attr,setter){ el(id).addEventListener('click',e=>{ const b=e.tar
   [...el(id).children].forEach(x=>x.classList.remove('active')); b.classList.add('active'); setter(b.dataset[attr]);
   drawLegend(); showFrame(0); }); }
 seg('eventseg','ev',v=>ev=v);
-seg('scenseg','scen',v=>scen=v);
+seg('scenseg','scen',v=>{ scen=v; const d=(v==='diff');
+  el('varseg').style.opacity=d?0.4:1; el('varseg').style.pointerEvents=d?'none':'auto'; });
 seg('varseg','var',v=>curVar=v);
 
-function nearestBand(r,g,b){ let best=null,bd=1e9;
-  for(const[lo,hi,c]of VARDEF[curVar].ramp){ const d=(r-c[0])**2+(g-c[1])**2+(b-c[2])**2; if(d<bd){bd=d;best=[lo,hi];} }
+function nearestBand(r,g,b,v){ let best=null,bd=1e9;
+  for(const[lo,hi,c]of VARDEF[v].ramp){ const d=(r-c[0])**2+(g-c[1])**2+(b-c[2])**2; if(d<bd){bd=d;best=[lo,hi];} }
   return bd<1200?best:null; }
 map.on('mousemove',e=>{
   const active=el('hoverToggle').checked || !playing;
@@ -182,11 +197,11 @@ map.on('mousemove',e=>{
   const pw=L.CRS.EPSG3857.project(L.latLng(s,w)), pe=L.CRS.EPSG3857.project(L.latLng(n,ee));
   const col=Math.floor((p.x-pw.x)/(pe.x-pw.x)*hcanvas.width);
   const row=Math.floor((pe.y-p.y)/(pe.y-pw.y)*hcanvas.height);
-  const name=curVar==='depth'?'Depth':'Wind', u=VARDEF[curVar].units;
+  const v=effVar(), name={depth:'Depth',rise:'Rise',wind:'Wind',diff:'Δ depth'}[v], u=VARDEF[v].units;
   if(col<0||row<0||col>=hcanvas.width||row>=hcanvas.height){ el('info').innerHTML=`<b>${name}:</b> —`; return; }
   const px=hctx.getImageData(col,row,1,1).data;
-  if(px[3]===0){ el('info').innerHTML=`<b>${name}:</b> ${curVar==='depth'?'dry / sea':'—'}`; return; }
-  const band=nearestBand(px[0],px[1],px[2]);
+  if(px[3]===0){ el('info').innerHTML=`<b>${name}:</b> ${v==='wind'?'—':(v==='diff'?'~0':'dry / sea')}`; return; }
+  const band=nearestBand(px[0],px[1],px[2],v);
   el('info').innerHTML=band?`<b>${name}:</b> ${band[0]}–${band[1]} ${u}`:`<b>${name}:</b> —`;
 });
 
@@ -204,6 +219,7 @@ async function loadOne(evk,sc,v){
     for(const v of VARS){ const s=await loadOne(evk,sc,v); if(s){o[v]=s; any=true;} }
     if(Object.keys(o).length) store[k]=o;
   }
+  for(const evk of EVENTS){ const s=await loadOne(evk,'diff','diff'); if(s){ store[`${evk}_diff`]={diff:s}; any=true; } }
   if(!any){
     el('mode').textContent='NO DATA';
     const b=el('banner'); b.style.display='block';

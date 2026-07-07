@@ -7,11 +7,18 @@ the Sabine region, under historical and future-climate scenarios.
 **Live viewer:** `animation.html` (open the GitHub Pages URL).
 
 ## Features
-- Event × Scenario × Variable selectors (Harvey/Rita/Ike · historical/future · inundation/wind)
+- **Event** (Harvey / Rita / Ike) × **Scenario** (historical / future / Δ future−historical)
+- **Variables:** Depth (total water depth), Rise (surge above pre-storm baseline,
+  fine 0–1 m ramp), Wind (speed)
+- **Δ Fut−Hist:** static future-minus-historical peak-depth difference map per event
 - Play / pause / time-slider with real simulation timestamps (6-hourly)
-- Pause-to-hover value readout (depth / wind band)
+- Pause-to-hover value readout
 - Crude-oil and natural-gas pipeline overlays with toggles
 - Carto Light basemap
+
+Tip: the events/scenarios look most different in the **Rise** and **Wind**
+layers and the **Δ Fut−Hist** map — total Depth is dominated by the shared
+seabed, so it looks similar across events by design.
 
 ## How it was built
 Frames are extracted from Delft3D / D-Flow FM `FlowFM_map.nc` output

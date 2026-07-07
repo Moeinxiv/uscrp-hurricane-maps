@@ -1,0 +1,101 @@
+{
+  "event": "Rita",
+  "scenario": "future",
+  "variable": "rise",
+  "units": "m",
+  "bounds": [
+    [
+      28.974991429868123,
+      -94.33611991576419
+    ],
+    [
+      30.227087808884963,
+      -93.48667298310077
+    ]
+  ],
+  "crs": "EPSG:3857",
+  "step_hours": 6.0,
+  "colormap": "wind9",
+  "frames": [
+    {
+      "t": "2005-09-20 00:01 UTC",
+      "png": "rise/frame_000.png",
+      "tif": "rise/frame_000.tif"
+    },
+    {
+      "t": "2005-09-20 06:01 UTC",
+      "png": "rise/frame_001.png",
+      "tif": "rise/frame_001.tif"
+    },
+    {
+      "t": "2005-09-20 12:01 UTC",
+      "png": "rise/frame_002.png",
+      "tif": "rise/frame_002.tif"
+    },
+    {
+      "t": "2005-09-20 18:01 UTC",
+      "png": "rise/frame_003.png",
+      "tif": "rise/frame_003.tif"
+    },
+    {
+      "t": "2005-09-21 00:01 UTC",
+      "png": "rise/frame_004.png",
+      "tif": "rise/frame_004.tif"
+    },
+    {
+      "t": "2005-09-21 06:01 UTC",
+      "png": "rise/frame_005.png",
+      "tif": "rise/frame_005.tif"
+    },
+    {
+      "t": "2005-09-21 12:01 UTC",
+      "png": "rise/frame_006.png",
+      "tif": "rise/frame_006.tif"
+    },
+    {
+      "t": "2005-09-21 18:01 UTC",
+      "png": "rise/frame_007.png",
+      "tif": "rise/frame_007.tif"
+    },
+    {
+      "t": "2005-09-22 00:01 UTC",
+      "png": "rise/frame_008.png",
+      "tif": "rise/frame_008.tif"
+    },
+    {
+      "t": "2005-09-22 06:01 UTC",
+      "png": "rise/frame_009.png",
+      "tif": "rise/frame_009.tif"
+    },
+    {
+      "t": "2005-09-22 12:01 UTC",
+      "png": "rise/frame_010.png",
+      "tif": "rise/frame_010.tif"
+    },
+    {
+      "t": "2005-09-22 18:01 UTC",
+      "png": "rise/frame_011.png",
+      "tif": "rise/frame_011.tif"
+    },
+    {
+      "t": "2005-09-23 00:01 UTC",
+      "png": "rise/frame_012.png",
+      "tif": "rise/frame_012.tif"
+    },
+    {
+      "t": "2005-09-23 06:01 UTC",
+      "png": "rise/frame_013.png",
+      "tif": "rise/frame_013.tif"
+    },
+    {
+      "t": "2005-09-23 12:01 UTC",
+      "png": "rise/frame_014.png",
+      "tif": "rise/frame_014.tif"
+    },
+    {
+      "t": "2005-09-23 18:01 UTC",
+      "png": "rise/frame_015.png",
+      "tif": "rise/frame_015.tif"
+    }
+  ]
+}
