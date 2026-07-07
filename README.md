@@ -16,10 +16,10 @@ the Sabine region, under historical and future-climate scenarios.
 ## How it was built
 Frames are extracted from Delft3D / D-Flow FM `FlowFM_map.nc` output
 (`mesh2d_waterdepth`, `mesh2d_windx/windy`) and rasterized onto a fixed
-EPSG:3857 grid matching the existing static maps. Depth is masked to overland
-inundation (permanent water removed) and mesh-edge artifacts are trimmed.
-See the project's `animation_pipeline/` for the extractor (`extract_flowfm_nc.py`)
-and full notes.
+EPSG:3857 grid matching the existing static maps. Depth shows **total water
+depth** (bays, estuaries, surge, and overland flooding); mesh-edge artifacts
+are trimmed. See the project's `animation_pipeline/` for the extractor
+(`extract_flowfm_nc.py`) and full notes.
 
 ## Structure
 ```
