@@ -64,8 +64,8 @@
   </div>
   <div class="grp"><div class="lbl">Variable</div>
     <div class="seg" id="varseg">
-      <button data-var="depth" class="active">Depth</button>
-      <button data-var="rise">Rise</button>
+      <button data-var="depth">Depth</button>
+      <button data-var="rise" class="active">Rise</button>
       <button data-var="wind">Wind</button>
     </div>
   </div>
@@ -139,7 +139,7 @@ const gasLayer=L.geoJSON(typeof json_NaturalGas_3!=='undefined'?json_NaturalGas_
   onEachFeature:(f,l)=>{const p=f.properties||{};l.bindPopup(`<b>Natural gas pipeline</b><br>${p.TYPEPIPE||''}${(p.Operator||p.Status)?'<br>'+(p.Operator||p.Status):''}`);}}).addTo(map);
 
 const el=id=>document.getElementById(id);
-let ev='harvey', scen='historical', curVar='depth', idx=0, playing=false, timer=null;
+let ev='harvey', scen='historical', curVar='rise', idx=0, playing=false, timer=null;
 let store={};   // store["<ev>_<scen>"][var] = {units, frames:[{t,url}]}
 const hcanvas=document.createElement('canvas'); let hctx=null, hImg=new Image(), hReady=false;
 hImg.crossOrigin='anonymous';
@@ -203,6 +203,65 @@ map.on('mousemove',e=>{
   if(px[3]===0){ el('info').innerHTML=`<b>${name}:</b> ${v==='wind'?'—':(v==='diff'?'~0':'dry / sea')}`; return; }
   const band=nearestBand(px[0],px[1],px[2],v);
   el('info').innerHTML=band?`<b>${name}:</b> ${band[0]}–${band[1]} ${u}`:`<b>${name}:</b> —`;
+});
+
+/* ---- click-a-point time series (samples the clicked pixel across every frame) ---- */
+function bandVal(v,r,g,b){ const bd=nearestBand(r,g,b,v); if(!bd) return null;
+  let [lo,hi]=bd; if(hi>=99) return lo; if(lo<=-99) return hi; return +((lo+hi)/2).toFixed(2); }
+const _sCanvas=document.createElement('canvas'); let _sctx=null;
+function _loadImg(url){ return new Promise((res,rej)=>{ const im=new Image(); im.crossOrigin='anonymous';
+  im.onload=()=>res(im); im.onerror=rej; im.src=url; }); }
+async function seriesAt(evk,sc,v,col,row){
+  const set=store[`${evk}_${sc}`] && store[`${evk}_${sc}`][v]; if(!set) return null;
+  const out=[];
+  for(const fr of set.frames){
+    let im; try{ im=await _loadImg(fr.url);}catch(e){ out.push({t:fr.t,val:null}); continue; }
+    if(_sCanvas.width!==im.naturalWidth){ _sCanvas.width=im.naturalWidth; _sCanvas.height=im.naturalHeight;
+      _sctx=_sCanvas.getContext('2d',{willReadFrequently:true}); }
+    _sctx.clearRect(0,0,_sCanvas.width,_sCanvas.height); _sctx.drawImage(im,0,0);
+    const c=Math.max(0,Math.min(col,_sCanvas.width-1)), r2=Math.max(0,Math.min(row,_sCanvas.height-1));
+    const px=_sctx.getImageData(c,r2,1,1).data;
+    out.push({t:fr.t, val: px[3]===0?null:bandVal(v,px[0],px[1],px[2])});
+  }
+  return out;
+}
+function sparkline(hist,future,v){
+  const W=280,H=140,pad={l:34,r:8,t:10,b:22};
+  const all=[...(hist||[]),...(future||[])].map(d=>d.val).filter(x=>x!=null);
+  if(!all.length) return `<div style="font:12px system-ui;color:#667">No ${VARDEF[v].units} values here (dry / outside domain).</div>`;
+  const ymax=Math.max(...all)*1.15||1, n=Math.max((hist||[]).length,(future||[]).length,2);
+  const X=i=>pad.l+(W-pad.l-pad.r)*(i/(n-1)), Y=y=>H-pad.b-(H-pad.t-pad.b)*(y/ymax);
+  const path=s=>{ if(!s) return ''; let d='',pen=false;
+    s.forEach((p,i)=>{ if(p.val==null){pen=false;return;} d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(p.val).toFixed(1)+' '; pen=true; }); return d; };
+  const grid=[0,ymax/2,ymax].map(y=>`<line x1="${pad.l}" y1="${Y(y).toFixed(1)}" x2="${W-pad.r}" y2="${Y(y).toFixed(1)}" stroke="#e5e8ec"/>`
+      +`<text x="${pad.l-4}" y="${(Y(y)+3).toFixed(1)}" text-anchor="end" font-size="9" fill="#889">${y.toFixed(y<10?1:0)}</text>`).join('');
+  const t0=(hist&&hist[0]&&hist[0].t)||'', t1=(hist&&hist[hist.length-1]&&hist[hist.length-1].t)||'';
+  return `<svg width="${W}" height="${H}" style="display:block">${grid}
+    <path d="${path(hist)}" fill="none" stroke="#2166ac" stroke-width="1.8"/>
+    <path d="${path(future)}" fill="none" stroke="#e6791b" stroke-width="1.8" stroke-dasharray="4 3"/>
+    <text x="${pad.l}" y="${H-6}" font-size="9" fill="#889">${(t0||'').slice(5,10)}</text>
+    <text x="${W-pad.r}" y="${H-6}" text-anchor="end" font-size="9" fill="#889">${(t1||'').slice(5,10)}</text>
+  </svg>
+  <div style="font:11px system-ui;color:#556;margin-top:2px">
+    <span style="color:#2166ac">■</span> Historical &nbsp; <span style="color:#e6791b">■</span> Future &nbsp;·&nbsp; ${VARDEF[v].legend}</div>`;
+}
+let clickMarker=null;
+map.on('click',async e=>{
+  const v=(curVar==='diff'?'rise':curVar);
+  const p=L.CRS.EPSG3857.project(e.latlng), [[s,w],[n,ee]]=BOUNDS;
+  const pw=L.CRS.EPSG3857.project(L.latLng(s,w)), pe=L.CRS.EPSG3857.project(L.latLng(n,ee));
+  const ref=store[`${ev}_historical`] && store[`${ev}_historical`][v]; if(!ref) return;
+  const dim=await _loadImg(ref.frames[0].url);
+  const col=Math.floor((p.x-pw.x)/(pe.x-pw.x)*dim.naturalWidth);
+  const row=Math.floor((pe.y-p.y)/(pe.y-pw.y)*dim.naturalHeight);
+  if(col<0||row<0||col>=dim.naturalWidth||row>=dim.naturalHeight) return;
+  if(clickMarker) map.removeLayer(clickMarker);
+  clickMarker=L.circleMarker(e.latlng,{radius:5,color:'#111',weight:2,fillColor:'#fff',fillOpacity:1}).addTo(map);
+  const name={depth:'Depth',rise:'Rise',wind:'Wind'}[v];
+  const pop=L.popup({maxWidth:320,minWidth:300}).setLatLng(e.latlng)
+    .setContent(`<b>${name} time series</b><br><span style="font:11px system-ui;color:#667">${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)} — sampling…</span>`).openOn(map);
+  const [hist,future]=await Promise.all([seriesAt(ev,'historical',v,col,row), seriesAt(ev,'future',v,col,row)]);
+  pop.setContent(`<b>${name} time series</b> <span style="font:11px system-ui;color:#667">(${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)})</span><br>${sparkline(hist,future,v)}`);
 });
 
 async function loadOne(evk,sc,v){
