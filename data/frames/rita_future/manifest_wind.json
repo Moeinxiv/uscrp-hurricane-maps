@@ -1,101 +1,90 @@
 {
-  "event": "Rita",
-  "scenario": "future",
-  "variable": "wind",
-  "units": "m/s",
-  "bounds": [
-    [
-      28.974991429868123,
-      -94.33611991576419
-    ],
-    [
-      30.227087808884963,
-      -93.48667298310077
-    ]
+ "event": "Rita",
+ "scenario": "future",
+ "variable": "wind",
+ "units": "m/s",
+ "bounds": [
+  [
+   28.6,
+   -96.0
   ],
-  "crs": "EPSG:3857",
-  "step_hours": 6.0,
-  "colormap": "wind9",
-  "frames": [
-    {
-      "t": "2005-09-20 00:01 UTC",
-      "png": "wind/frame_000.png",
-      "tif": "wind/frame_000.tif"
-    },
-    {
-      "t": "2005-09-20 06:01 UTC",
-      "png": "wind/frame_001.png",
-      "tif": "wind/frame_001.tif"
-    },
-    {
-      "t": "2005-09-20 12:01 UTC",
-      "png": "wind/frame_002.png",
-      "tif": "wind/frame_002.tif"
-    },
-    {
-      "t": "2005-09-20 18:01 UTC",
-      "png": "wind/frame_003.png",
-      "tif": "wind/frame_003.tif"
-    },
-    {
-      "t": "2005-09-21 00:01 UTC",
-      "png": "wind/frame_004.png",
-      "tif": "wind/frame_004.tif"
-    },
-    {
-      "t": "2005-09-21 06:01 UTC",
-      "png": "wind/frame_005.png",
-      "tif": "wind/frame_005.tif"
-    },
-    {
-      "t": "2005-09-21 12:01 UTC",
-      "png": "wind/frame_006.png",
-      "tif": "wind/frame_006.tif"
-    },
-    {
-      "t": "2005-09-21 18:01 UTC",
-      "png": "wind/frame_007.png",
-      "tif": "wind/frame_007.tif"
-    },
-    {
-      "t": "2005-09-22 00:01 UTC",
-      "png": "wind/frame_008.png",
-      "tif": "wind/frame_008.tif"
-    },
-    {
-      "t": "2005-09-22 06:01 UTC",
-      "png": "wind/frame_009.png",
-      "tif": "wind/frame_009.tif"
-    },
-    {
-      "t": "2005-09-22 12:01 UTC",
-      "png": "wind/frame_010.png",
-      "tif": "wind/frame_010.tif"
-    },
-    {
-      "t": "2005-09-22 18:01 UTC",
-      "png": "wind/frame_011.png",
-      "tif": "wind/frame_011.tif"
-    },
-    {
-      "t": "2005-09-23 00:01 UTC",
-      "png": "wind/frame_012.png",
-      "tif": "wind/frame_012.tif"
-    },
-    {
-      "t": "2005-09-23 06:01 UTC",
-      "png": "wind/frame_013.png",
-      "tif": "wind/frame_013.tif"
-    },
-    {
-      "t": "2005-09-23 12:01 UTC",
-      "png": "wind/frame_014.png",
-      "tif": "wind/frame_014.tif"
-    },
-    {
-      "t": "2005-09-23 18:01 UTC",
-      "png": "wind/frame_015.png",
-      "tif": "wind/frame_015.tif"
-    }
+  [
+   30.6,
+   -93.0
   ]
+ ],
+ "crs": "EPSG:3857",
+ "step_hours": 6,
+ "colormap": "wind9",
+ "vectors": true,
+ "frames": [
+  {
+   "t": "2005-09-20 00:01 UTC",
+   "png": "wind/frame_000.png"
+  },
+  {
+   "t": "2005-09-20 06:01 UTC",
+   "png": "wind/frame_001.png"
+  },
+  {
+   "t": "2005-09-20 12:01 UTC",
+   "png": "wind/frame_002.png"
+  },
+  {
+   "t": "2005-09-20 18:01 UTC",
+   "png": "wind/frame_003.png"
+  },
+  {
+   "t": "2005-09-21 00:01 UTC",
+   "png": "wind/frame_004.png"
+  },
+  {
+   "t": "2005-09-21 06:01 UTC",
+   "png": "wind/frame_005.png"
+  },
+  {
+   "t": "2005-09-21 12:01 UTC",
+   "png": "wind/frame_006.png"
+  },
+  {
+   "t": "2005-09-21 18:01 UTC",
+   "png": "wind/frame_007.png"
+  },
+  {
+   "t": "2005-09-22 00:01 UTC",
+   "png": "wind/frame_008.png"
+  },
+  {
+   "t": "2005-09-22 06:01 UTC",
+   "png": "wind/frame_009.png"
+  },
+  {
+   "t": "2005-09-22 12:01 UTC",
+   "png": "wind/frame_010.png"
+  },
+  {
+   "t": "2005-09-22 18:01 UTC",
+   "png": "wind/frame_011.png"
+  },
+  {
+   "t": "2005-09-23 00:01 UTC",
+   "png": "wind/frame_012.png"
+  },
+  {
+   "t": "2005-09-23 06:01 UTC",
+   "png": "wind/frame_013.png"
+  },
+  {
+   "t": "2005-09-23 12:01 UTC",
+   "png": "wind/frame_014.png"
+  },
+  {
+   "t": "2005-09-23 18:01 UTC",
+   "png": "wind/frame_015.png"
+  },
+  {
+   "t": "2005-09-23 23:56 UTC",
+   "png": "wind/frame_016.png"
+  }
+ ]
 }

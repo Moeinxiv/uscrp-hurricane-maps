@@ -160,10 +160,12 @@ function curSet(){
   if(scen==='diff'){ return store[`${ev}_diff`] && store[`${ev}_diff`]['diff']; }
   return store[`${ev}_${scen}`] && store[`${ev}_${scen}`][curVar];
 }
+function curBounds(){ const s=curSet(); return (s&&s.bounds)?L.latLngBounds(s.bounds):L.latLngBounds(BOUNDS); }
 function showFrame(i){
   const set=curSet(); if(!set||!set.frames.length){ overlay.setUrl(''); el('tlabel').textContent='no data'; return; }
   idx=Math.max(0,Math.min(i,set.frames.length-1));
   const f=set.frames[idx];
+  overlay.setBounds(curBounds());
   overlay.setUrl(f.url); hReady=false; hImg.src=f.url;
   el('scrub').max=set.frames.length-1; el('scrub').value=idx;
   el('tlabel').textContent=f.t||`frame ${idx+1}/${set.frames.length}`;
@@ -193,7 +195,7 @@ map.on('mousemove',e=>{
   const active=el('hoverToggle').checked || !playing;
   if(!active){ el('info').innerHTML='Playing… pause to read values'; return; }
   if(!hReady||!hctx) return;
-  const p=L.CRS.EPSG3857.project(e.latlng), [[s,w],[n,ee]]=BOUNDS;
+  const p=L.CRS.EPSG3857.project(e.latlng), [[s,w],[n,ee]]=((curSet()&&curSet().bounds)||BOUNDS);
   const pw=L.CRS.EPSG3857.project(L.latLng(s,w)), pe=L.CRS.EPSG3857.project(L.latLng(n,ee));
   const col=Math.floor((p.x-pw.x)/(pe.x-pw.x)*hcanvas.width);
   const row=Math.floor((pe.y-p.y)/(pe.y-pw.y)*hcanvas.height);
@@ -248,9 +250,9 @@ function sparkline(hist,future,v){
 let clickMarker=null;
 map.on('click',async e=>{
   const v=(curVar==='diff'?'rise':curVar);
-  const p=L.CRS.EPSG3857.project(e.latlng), [[s,w],[n,ee]]=BOUNDS;
-  const pw=L.CRS.EPSG3857.project(L.latLng(s,w)), pe=L.CRS.EPSG3857.project(L.latLng(n,ee));
   const ref=store[`${ev}_historical`] && store[`${ev}_historical`][v]; if(!ref) return;
+  const p=L.CRS.EPSG3857.project(e.latlng), [[s,w],[n,ee]]=(ref.bounds||BOUNDS);
+  const pw=L.CRS.EPSG3857.project(L.latLng(s,w)), pe=L.CRS.EPSG3857.project(L.latLng(n,ee));
   const dim=await _loadImg(ref.frames[0].url);
   const col=Math.floor((p.x-pw.x)/(pe.x-pw.x)*dim.naturalWidth);
   const row=Math.floor((pe.y-p.y)/(pe.y-pw.y)*dim.naturalHeight);
@@ -268,7 +270,7 @@ async function loadOne(evk,sc,v){
   const r=await fetch(`${DATA_DIR}${evk}_${sc}/manifest_${v}.json`,{cache:'no-store'});
   if(!r.ok) return null;
   const m=await r.json();
-  return {units:m.units, frames:m.frames.map(fr=>({t:fr.t,url:`${DATA_DIR}${evk}_${sc}/${fr.png}`}))};
+  return {units:m.units, bounds:m.bounds||null, frames:m.frames.map(fr=>({t:fr.t,url:`${DATA_DIR}${evk}_${sc}/${fr.png}`}))};
 }
 (async function init(){
   drawLegend();
