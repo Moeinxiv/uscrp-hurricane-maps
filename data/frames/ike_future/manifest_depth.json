@@ -1,73 +1,86 @@
 {
- "event": "Ike",
- "scenario": "future",
- "variable": "depth",
- "units": "m",
- "bounds": [
-  [
-   28.974991429868123,
-   -94.33611991576419
+  "event": "Ike",
+  "scenario": "future",
+  "variable": "depth",
+  "units": "m",
+  "bounds": [
+    [
+      28.974991429868123,
+      -94.33611991576419
+    ],
+    [
+      30.227087808884963,
+      -93.48667298310077
+    ]
   ],
-  [
-   30.227087808884963,
-   -93.48667298310077
+  "crs": "EPSG:3857",
+  "step_hours": 6.0,
+  "colormap": "depth9",
+  "frames": [
+    {
+      "t": "2008-09-08 20:00 UTC",
+      "png": "depth/frame_000.png",
+      "tif": "depth/frame_000.tif"
+    },
+    {
+      "t": "2008-09-09 02:00 UTC",
+      "png": "depth/frame_001.png",
+      "tif": "depth/frame_001.tif"
+    },
+    {
+      "t": "2008-09-09 08:00 UTC",
+      "png": "depth/frame_002.png",
+      "tif": "depth/frame_002.tif"
+    },
+    {
+      "t": "2008-09-09 14:00 UTC",
+      "png": "depth/frame_003.png",
+      "tif": "depth/frame_003.tif"
+    },
+    {
+      "t": "2008-09-09 20:00 UTC",
+      "png": "depth/frame_004.png",
+      "tif": "depth/frame_004.tif"
+    },
+    {
+      "t": "2008-09-10 02:00 UTC",
+      "png": "depth/frame_005.png",
+      "tif": "depth/frame_005.tif"
+    },
+    {
+      "t": "2008-09-10 08:00 UTC",
+      "png": "depth/frame_006.png",
+      "tif": "depth/frame_006.tif"
+    },
+    {
+      "t": "2008-09-10 14:00 UTC",
+      "png": "depth/frame_007.png",
+      "tif": "depth/frame_007.tif"
+    },
+    {
+      "t": "2008-09-10 20:00 UTC",
+      "png": "depth/frame_008.png",
+      "tif": "depth/frame_008.tif"
+    },
+    {
+      "t": "2008-09-11 02:00 UTC",
+      "png": "depth/frame_009.png",
+      "tif": "depth/frame_009.tif"
+    },
+    {
+      "t": "2008-09-11 08:00 UTC",
+      "png": "depth/frame_010.png",
+      "tif": "depth/frame_010.tif"
+    },
+    {
+      "t": "2008-09-11 14:00 UTC",
+      "png": "depth/frame_011.png",
+      "tif": "depth/frame_011.tif"
+    },
+    {
+      "t": "2008-09-11 20:00 UTC",
+      "png": "depth/frame_012.png",
+      "tif": "depth/frame_012.tif"
+    }
   ]
- ],
- "crs": "EPSG:3857",
- "step_hours": 6,
- "colormap": "depth9",
- "frames": [
-  {
-   "t": "2008-09-08 20:00 UTC",
-   "png": "depth/frame_000.png"
-  },
-  {
-   "t": "2008-09-09 02:00 UTC",
-   "png": "depth/frame_001.png"
-  },
-  {
-   "t": "2008-09-09 08:00 UTC",
-   "png": "depth/frame_002.png"
-  },
-  {
-   "t": "2008-09-09 14:00 UTC",
-   "png": "depth/frame_003.png"
-  },
-  {
-   "t": "2008-09-09 20:00 UTC",
-   "png": "depth/frame_004.png"
-  },
-  {
-   "t": "2008-09-10 02:00 UTC",
-   "png": "depth/frame_005.png"
-  },
-  {
-   "t": "2008-09-10 08:00 UTC",
-   "png": "depth/frame_006.png"
-  },
-  {
-   "t": "2008-09-10 14:00 UTC",
-   "png": "depth/frame_007.png"
-  },
-  {
-   "t": "2008-09-10 20:00 UTC",
-   "png": "depth/frame_008.png"
-  },
-  {
-   "t": "2008-09-11 02:00 UTC",
-   "png": "depth/frame_009.png"
-  },
-  {
-   "t": "2008-09-11 08:00 UTC",
-   "png": "depth/frame_010.png"
-  },
-  {
-   "t": "2008-09-11 14:00 UTC",
-   "png": "depth/frame_011.png"
-  },
-  {
-   "t": "2008-09-11 20:00 UTC",
-   "png": "depth/frame_012.png"
-  }
- ]
 }

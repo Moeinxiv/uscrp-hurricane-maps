@@ -1,137 +1,166 @@
 {
- "event": "Harvey",
- "scenario": "historical",
- "variable": "depth",
- "units": "m",
- "bounds": [
-  [
-   28.974991429868123,
-   -94.33611991576419
+  "event": "Harvey",
+  "scenario": "historical",
+  "variable": "depth",
+  "units": "m",
+  "bounds": [
+    [
+      28.974991429868123,
+      -94.33611991576419
+    ],
+    [
+      30.227087808884963,
+      -93.48667298310077
+    ]
   ],
-  [
-   30.227087808884963,
-   -93.48667298310077
+  "crs": "EPSG:3857",
+  "step_hours": 6.0,
+  "colormap": "depth9",
+  "frames": [
+    {
+      "t": "2017-08-23 00:00 UTC",
+      "png": "depth/frame_000.png",
+      "tif": "depth/frame_000.tif"
+    },
+    {
+      "t": "2017-08-23 06:00 UTC",
+      "png": "depth/frame_001.png",
+      "tif": "depth/frame_001.tif"
+    },
+    {
+      "t": "2017-08-23 12:00 UTC",
+      "png": "depth/frame_002.png",
+      "tif": "depth/frame_002.tif"
+    },
+    {
+      "t": "2017-08-23 18:00 UTC",
+      "png": "depth/frame_003.png",
+      "tif": "depth/frame_003.tif"
+    },
+    {
+      "t": "2017-08-24 00:00 UTC",
+      "png": "depth/frame_004.png",
+      "tif": "depth/frame_004.tif"
+    },
+    {
+      "t": "2017-08-24 06:00 UTC",
+      "png": "depth/frame_005.png",
+      "tif": "depth/frame_005.tif"
+    },
+    {
+      "t": "2017-08-24 12:00 UTC",
+      "png": "depth/frame_006.png",
+      "tif": "depth/frame_006.tif"
+    },
+    {
+      "t": "2017-08-24 18:00 UTC",
+      "png": "depth/frame_007.png",
+      "tif": "depth/frame_007.tif"
+    },
+    {
+      "t": "2017-08-25 00:00 UTC",
+      "png": "depth/frame_008.png",
+      "tif": "depth/frame_008.tif"
+    },
+    {
+      "t": "2017-08-25 06:00 UTC",
+      "png": "depth/frame_009.png",
+      "tif": "depth/frame_009.tif"
+    },
+    {
+      "t": "2017-08-25 12:00 UTC",
+      "png": "depth/frame_010.png",
+      "tif": "depth/frame_010.tif"
+    },
+    {
+      "t": "2017-08-25 18:00 UTC",
+      "png": "depth/frame_011.png",
+      "tif": "depth/frame_011.tif"
+    },
+    {
+      "t": "2017-08-26 00:00 UTC",
+      "png": "depth/frame_012.png",
+      "tif": "depth/frame_012.tif"
+    },
+    {
+      "t": "2017-08-26 06:00 UTC",
+      "png": "depth/frame_013.png",
+      "tif": "depth/frame_013.tif"
+    },
+    {
+      "t": "2017-08-26 12:00 UTC",
+      "png": "depth/frame_014.png",
+      "tif": "depth/frame_014.tif"
+    },
+    {
+      "t": "2017-08-26 18:00 UTC",
+      "png": "depth/frame_015.png",
+      "tif": "depth/frame_015.tif"
+    },
+    {
+      "t": "2017-08-27 00:00 UTC",
+      "png": "depth/frame_016.png",
+      "tif": "depth/frame_016.tif"
+    },
+    {
+      "t": "2017-08-27 06:00 UTC",
+      "png": "depth/frame_017.png",
+      "tif": "depth/frame_017.tif"
+    },
+    {
+      "t": "2017-08-27 12:00 UTC",
+      "png": "depth/frame_018.png",
+      "tif": "depth/frame_018.tif"
+    },
+    {
+      "t": "2017-08-27 18:00 UTC",
+      "png": "depth/frame_019.png",
+      "tif": "depth/frame_019.tif"
+    },
+    {
+      "t": "2017-08-28 00:00 UTC",
+      "png": "depth/frame_020.png",
+      "tif": "depth/frame_020.tif"
+    },
+    {
+      "t": "2017-08-28 06:00 UTC",
+      "png": "depth/frame_021.png",
+      "tif": "depth/frame_021.tif"
+    },
+    {
+      "t": "2017-08-28 12:00 UTC",
+      "png": "depth/frame_022.png",
+      "tif": "depth/frame_022.tif"
+    },
+    {
+      "t": "2017-08-28 18:00 UTC",
+      "png": "depth/frame_023.png",
+      "tif": "depth/frame_023.tif"
+    },
+    {
+      "t": "2017-08-29 00:00 UTC",
+      "png": "depth/frame_024.png",
+      "tif": "depth/frame_024.tif"
+    },
+    {
+      "t": "2017-08-29 06:00 UTC",
+      "png": "depth/frame_025.png",
+      "tif": "depth/frame_025.tif"
+    },
+    {
+      "t": "2017-08-29 12:00 UTC",
+      "png": "depth/frame_026.png",
+      "tif": "depth/frame_026.tif"
+    },
+    {
+      "t": "2017-08-29 18:00 UTC",
+      "png": "depth/frame_027.png",
+      "tif": "depth/frame_027.tif"
+    },
+    {
+      "t": "2017-08-30 00:00 UTC",
+      "png": "depth/frame_028.png",
+      "tif": "depth/frame_028.tif"
+    }
   ]
- ],
- "crs": "EPSG:3857",
- "step_hours": 6,
- "colormap": "depth9",
- "frames": [
-  {
-   "t": "2017-08-23 00:00 UTC",
-   "png": "depth/frame_000.png"
-  },
-  {
-   "t": "2017-08-23 06:00 UTC",
-   "png": "depth/frame_001.png"
-  },
-  {
-   "t": "2017-08-23 12:00 UTC",
-   "png": "depth/frame_002.png"
-  },
-  {
-   "t": "2017-08-23 18:00 UTC",
-   "png": "depth/frame_003.png"
-  },
-  {
-   "t": "2017-08-24 00:00 UTC",
-   "png": "depth/frame_004.png"
-  },
-  {
-   "t": "2017-08-24 06:00 UTC",
-   "png": "depth/frame_005.png"
-  },
-  {
-   "t": "2017-08-24 12:00 UTC",
-   "png": "depth/frame_006.png"
-  },
-  {
-   "t": "2017-08-24 18:00 UTC",
-   "png": "depth/frame_007.png"
-  },
-  {
-   "t": "2017-08-25 00:00 UTC",
-   "png": "depth/frame_008.png"
-  },
-  {
-   "t": "2017-08-25 06:00 UTC",
-   "png": "depth/frame_009.png"
-  },
-  {
-   "t": "2017-08-25 12:00 UTC",
-   "png": "depth/frame_010.png"
-  },
-  {
-   "t": "2017-08-25 18:00 UTC",
-   "png": "depth/frame_011.png"
-  },
-  {
-   "t": "2017-08-26 00:00 UTC",
-   "png": "depth/frame_012.png"
-  },
-  {
-   "t": "2017-08-26 06:00 UTC",
-   "png": "depth/frame_013.png"
-  },
-  {
-   "t": "2017-08-26 12:00 UTC",
-   "png": "depth/frame_014.png"
-  },
-  {
-   "t": "2017-08-26 18:00 UTC",
-   "png": "depth/frame_015.png"
-  },
-  {
-   "t": "2017-08-27 00:00 UTC",
-   "png": "depth/frame_016.png"
-  },
-  {
-   "t": "2017-08-27 06:00 UTC",
-   "png": "depth/frame_017.png"
-  },
-  {
-   "t": "2017-08-27 12:00 UTC",
-   "png": "depth/frame_018.png"
-  },
-  {
-   "t": "2017-08-27 18:00 UTC",
-   "png": "depth/frame_019.png"
-  },
-  {
-   "t": "2017-08-28 00:00 UTC",
-   "png": "depth/frame_020.png"
-  },
-  {
-   "t": "2017-08-28 06:00 UTC",
-   "png": "depth/frame_021.png"
-  },
-  {
-   "t": "2017-08-28 12:00 UTC",
-   "png": "depth/frame_022.png"
-  },
-  {
-   "t": "2017-08-28 18:00 UTC",
-   "png": "depth/frame_023.png"
-  },
-  {
-   "t": "2017-08-29 00:00 UTC",
-   "png": "depth/frame_024.png"
-  },
-  {
-   "t": "2017-08-29 06:00 UTC",
-   "png": "depth/frame_025.png"
-  },
-  {
-   "t": "2017-08-29 12:00 UTC",
-   "png": "depth/frame_026.png"
-  },
-  {
-   "t": "2017-08-29 18:00 UTC",
-   "png": "depth/frame_027.png"
-  },
-  {
-   "t": "2017-08-30 00:00 UTC",
-   "png": "depth/frame_028.png"
-  }
- ]
 }
