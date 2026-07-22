@@ -37,6 +37,8 @@
   #legend{position:absolute;right:14px;bottom:160px;z-index:9999;padding:12px 14px;font-size:12px}
   #legend .row{display:flex;align-items:center;margin:3px 0}
   #legend .sw{width:14px;height:14px;border-radius:4px;margin-right:8px;border:1px solid rgba(0,0,0,.15)}
+  #legNote{margin-top:8px;max-width:210px;font-size:10.5px;line-height:1.35;color:#555;border-top:1px solid rgba(0,0,0,.12);padding-top:6px}
+  #legNote:empty{display:none}
   #info{position:absolute;top:14px;left:14px;z-index:9999;padding:10px 14px;font-size:13px;min-width:180px}
   #banner{position:absolute;top:0;left:0;right:0;z-index:10000;background:#b45309;color:#fff;
     font:600 12px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;text-align:center;padding:5px 10px;display:none}
@@ -79,7 +81,7 @@
   </div>
 </div>
 
-<div id="legend" class="ui-panel"><h4 id="legTitle">Max Depth (m)</h4><div id="legRows"></div></div>
+<div id="legend" class="ui-panel"><h4 id="legTitle">Max Depth (m)</h4><div id="legRows"></div><div id="legNote"></div></div>
 
 <div id="timeline" class="ui-panel">
   <div class="row">
@@ -119,7 +121,7 @@ const RISE_RAMP=[[0.05,0.1,[215,235,255]],[0.1,0.2,[170,205,245]],[0.2,0.3,[110,
   [0.4,0.5,[120,205,90]],[0.5,0.75,[215,215,70]],[0.75,1.0,[250,170,55]],[1.0,1.5,[240,110,45]],[1.5,99,[200,40,40]]];
 const DIFF_RAMP=[[-99,-0.5,[33,102,172]],[-0.5,-0.2,[103,169,207]],[-0.2,-0.05,[180,210,235]],
   [0.05,0.2,[250,200,170]],[0.2,0.5,[239,138,98]],[0.5,99,[178,24,43]]];
-const VARDEF={depth:{ramp:DEPTH_RAMP,units:'m',legend:'Max water depth (m)'},
+const VARDEF={depth:{ramp:DEPTH_RAMP,units:'m',legend:'Max water depth (m)',note:'Shows <b>total</b> water depth, which is dominated by the permanent Gulf &amp; bays — so all three storms look similar here <i>by design</i>. To compare storms, switch to <b>Rise</b> (surge above baseline) or <b>Δ Future−Historical</b>.'},
               rise:{ramp:RISE_RAMP,units:'m',legend:'Water rise (m)'},
               wind:{ramp:WIND_RAMP,units:'m/s',legend:'Wind speed (m/s)'},
               diff:{ramp:DIFF_RAMP,units:'m',legend:'Future − Historical (m)',diverging:true}};
@@ -150,6 +152,7 @@ function effVar(){ return scen==='diff' ? 'diff' : curVar; }
 function drawLegend(){
   const def=VARDEF[effVar()];
   el('legTitle').textContent=def.legend;
+  el('legNote').innerHTML=def.note||'';
   el('legRows').innerHTML=def.ramp.map(([lo,hi,c])=>{
     let lbl;
     if(def.diverging){ lbl = lo<=-99?`< ${hi}` : (hi>=99?`> +${lo}` : `${lo} … ${hi}`); }
