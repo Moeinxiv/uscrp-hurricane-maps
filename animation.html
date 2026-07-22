@@ -39,6 +39,8 @@
   #legend .sw{width:14px;height:14px;border-radius:4px;margin-right:8px;border:1px solid rgba(0,0,0,.15)}
   #legNote{margin-top:8px;max-width:210px;font-size:10.5px;line-height:1.35;color:#555;border-top:1px solid rgba(0,0,0,.12);padding-top:6px}
   #legNote:empty{display:none}
+  #windrose{position:absolute;left:14px;bottom:150px;z-index:9999;padding:9px 11px;width:154px;display:none}
+  #windrose canvas{display:block;margin:0 auto}
   #info{position:absolute;top:14px;left:14px;z-index:9999;padding:10px 14px;font-size:13px;min-width:180px}
   #banner{position:absolute;top:0;left:0;right:0;z-index:10000;background:#b45309;color:#fff;
     font:600 12px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;text-align:center;padding:5px 10px;display:none}
@@ -82,6 +84,8 @@
 </div>
 
 <div id="legend" class="ui-panel"><h4 id="legTitle">Max Depth (m)</h4><div id="legRows"></div><div id="legNote"></div></div>
+
+<div id="windrose" class="ui-panel"><h4>Wind rose — from</h4><canvas id="roseCanvas" width="132" height="132"></canvas><div id="rosePeak" style="text-align:center;font-size:11px;font-weight:600;color:#34495e;margin-top:2px"></div></div>
 
 <div id="timeline" class="ui-panel">
   <div class="row">
@@ -142,6 +146,7 @@ const gasLayer=L.geoJSON(typeof json_NaturalGas_3!=='undefined'?json_NaturalGas_
 
 const el=id=>document.getElementById(id);
 let ev='harvey', scen='historical', curVar='rise', idx=0, playing=false, timer=null;
+let roseData=null;
 let store={};   // store["<ev>_<scen>"][var] = {units, frames:[{t,url}]}
 const hcanvas=document.createElement('canvas'); let hctx=null, hImg=new Image(), hReady=false;
 hImg.crossOrigin='anonymous';
@@ -164,14 +169,33 @@ function curSet(){
   return store[`${ev}_${scen}`] && store[`${ev}_${scen}`][curVar];
 }
 function curBounds(){ const s=curSet(); return (s&&s.bounds)?L.latLngBounds(s.bounds):L.latLngBounds(BOUNDS); }
+function drawRose(){
+  const key=`${ev}_${scen}`, show=(effVar()==='wind')&&roseData&&roseData[key];
+  const panel=el('windrose'); if(!show){ panel.style.display='none'; return; }
+  panel.style.display='block';
+  const rd=roseData[key], fr=(rd.frames&&rd.frames[Math.min(idx,rd.frames.length-1)])||{bins:[],peak:0};
+  const cv=el('roseCanvas'), ctx=cv.getContext('2d'), S=cv.width, cx=S/2, cy=S/2, R=S/2-16;
+  ctx.clearRect(0,0,S,S);
+  ctx.strokeStyle='rgba(0,0,0,.12)'; [0.5,1].forEach(f=>{ctx.beginPath();ctx.arc(cx,cy,R*f,0,2*Math.PI);ctx.stroke();});
+  const NB=rd.nbins||16, bins=fr.bins||[];
+  for(let i=0;i<NB;i++){ const b=bins[i]||0; if(b<=0) continue;
+    const c=(i+0.5)*(360/NB)-90, w=(360/NB)/2*0.88;
+    const a0=(c-w)*Math.PI/180, a1=(c+w)*Math.PI/180, r=Math.max(2,b*R);
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,a0,a1); ctx.closePath();
+    ctx.fillStyle='rgba(52,120,180,.78)'; ctx.fill(); }
+  ctx.fillStyle='#5c6c7c'; ctx.font='bold 10px -apple-system,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('N',cx,cy-R-7); ctx.fillText('S',cx,cy+R+7); ctx.fillText('E',cx+R+8,cy); ctx.fillText('W',cx-R-8,cy);
+  el('rosePeak').textContent = fr.peak ? ('peak '+fr.peak+' m/s') : '';
+}
 function showFrame(i){
-  const set=curSet(); if(!set||!set.frames.length){ overlay.setUrl(''); el('tlabel').textContent='no data'; return; }
+  const set=curSet(); if(!set||!set.frames.length){ overlay.setUrl(''); el('tlabel').textContent='no data'; drawRose(); return; }
   idx=Math.max(0,Math.min(i,set.frames.length-1));
   const f=set.frames[idx];
   overlay.setBounds(curBounds());
   overlay.setUrl(f.url); hReady=false; hImg.src=f.url;
   el('scrub').max=set.frames.length-1; el('scrub').value=idx;
   el('tlabel').textContent=f.t||`frame ${idx+1}/${set.frames.length}`;
+  drawRose();
 }
 function play(){ if(playing||!curSet())return; playing=true; el('playBtn').textContent='⏸';
   timer=setInterval(()=>{ const n=curSet().frames.length; showFrame((idx+1)%n); }, +el('speed').value); }
@@ -290,6 +314,7 @@ async function loadOne(evk,sc,v){
     b.textContent='No frames found under "'+DATA_DIR+'". Serve this folder over HTTP: run  python3 -m http.server  here, then open http://localhost:8000/animation.html';
     return;
   }
+  try{ roseData=await (await fetch('data/wind_rose.json',{cache:'no-store'})).json(); }catch(e){ roseData=null; }
   el('mode').textContent='LIVE';
   showFrame(0);
 })();
