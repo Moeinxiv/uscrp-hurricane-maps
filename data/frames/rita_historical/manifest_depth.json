@@ -16,6 +16,7 @@
   "crs": "EPSG:3857",
   "step_hours": 6.0,
   "colormap": "depth9",
+  "cumulative_max": true,
   "frames": [
     {
       "t": "2005-09-20 00:01 UTC",
