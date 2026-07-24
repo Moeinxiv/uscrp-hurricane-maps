@@ -1,0 +1,81 @@
+{
+ "variable": "wind",
+ "vmax": 75.0,
+ "units": "m/s",
+ "bounds": [
+  [
+   28.974991429868123,
+   -94.33611991576419
+  ],
+  [
+   30.227087808884963,
+   -93.48667298310077
+  ]
+ ],
+ "frames": [
+  {
+   "t": "2005-09-20 00:01 UTC",
+   "data": "wind_data/frame_000.png"
+  },
+  {
+   "t": "2005-09-20 06:01 UTC",
+   "data": "wind_data/frame_001.png"
+  },
+  {
+   "t": "2005-09-20 12:01 UTC",
+   "data": "wind_data/frame_002.png"
+  },
+  {
+   "t": "2005-09-20 18:01 UTC",
+   "data": "wind_data/frame_003.png"
+  },
+  {
+   "t": "2005-09-21 00:01 UTC",
+   "data": "wind_data/frame_004.png"
+  },
+  {
+   "t": "2005-09-21 06:01 UTC",
+   "data": "wind_data/frame_005.png"
+  },
+  {
+   "t": "2005-09-21 12:01 UTC",
+   "data": "wind_data/frame_006.png"
+  },
+  {
+   "t": "2005-09-21 18:01 UTC",
+   "data": "wind_data/frame_007.png"
+  },
+  {
+   "t": "2005-09-22 00:01 UTC",
+   "data": "wind_data/frame_008.png"
+  },
+  {
+   "t": "2005-09-22 06:01 UTC",
+   "data": "wind_data/frame_009.png"
+  },
+  {
+   "t": "2005-09-22 12:01 UTC",
+   "data": "wind_data/frame_010.png"
+  },
+  {
+   "t": "2005-09-22 18:01 UTC",
+   "data": "wind_data/frame_011.png"
+  },
+  {
+   "t": "2005-09-23 00:01 UTC",
+   "data": "wind_data/frame_012.png"
+  },
+  {
+   "t": "2005-09-23 06:01 UTC",
+   "data": "wind_data/frame_013.png"
+  },
+  {
+   "t": "2005-09-23 12:01 UTC",
+   "data": "wind_data/frame_014.png"
+  },
+  {
+   "t": "2005-09-23 18:01 UTC",
+   "data": "wind_data/frame_015.png"
+  }
+ ]
+}

@@ -174,6 +174,11 @@ const hcanvas=document.createElement('canvas'); let hctx=null, hImg=new Image(),
 hImg.crossOrigin='anonymous';
 hImg.onload=()=>{ hcanvas.width=hImg.naturalWidth; hcanvas.height=hImg.naturalHeight;
   hctx=hcanvas.getContext('2d',{willReadFrequently:true}); hctx.drawImage(hImg,0,0); hReady=true; };
+// exact-value data tile for the current frame (8-bit LA png; value = R/255*dVmax where alpha>0)
+const dcanvas=document.createElement('canvas'); let dctx=null, dImg=new Image(), dReady=false, dVmax=null;
+dImg.crossOrigin='anonymous';
+dImg.onload=()=>{ dcanvas.width=dImg.naturalWidth; dcanvas.height=dImg.naturalHeight;
+  dctx=dcanvas.getContext('2d',{willReadFrequently:true}); dctx.drawImage(dImg,0,0); dReady=true; };
 
 function effVar(){ if(scen==='diff') return 'diff'; return curVar==='overland' ? 'overland_'+omode : curVar; }
 function drawLegend(){
@@ -215,6 +220,7 @@ function showFrame(i){
   const f=set.frames[idx];
   overlay.setBounds(curBounds());
   overlay.setUrl(f.url); hReady=false; hImg.src=f.url;
+  dReady=false; dctx=null; if(f.data){ dVmax=set.vmax; dImg.src=f.data; } else { dVmax=null; }
   el('scrub').max=set.frames.length-1; el('scrub').value=idx;
   el('tlabel').textContent=f.t||`frame ${idx+1}/${set.frames.length}`;
   drawRose();
@@ -256,6 +262,13 @@ map.on('mousemove',e=>{
   const dryTxt=v==='wind'?'—':(v==='diff'?'~0':(v.indexOf('overland')===0?'not flooded':'dry / sea'));
   if(px[3]===0){ el('info').innerHTML=`<b>${name}:</b> ${dryTxt}`; return; }
   if(v==='overland_hybrid' && Math.abs(px[0]-176)<10 && Math.abs(px[1]-190)<10 && Math.abs(px[2]-199)<10){ el('info').innerHTML=`<b>${name}:</b> permanent water`; return; }
+  if(dReady && dctx && dVmax!=null){
+    const dc=Math.floor((p.x-pw.x)/(pe.x-pw.x)*dcanvas.width), dr2=Math.floor((pe.y-p.y)/(pe.y-pw.y)*dcanvas.height);
+    if(dc>=0&&dr2>=0&&dc<dcanvas.width&&dr2<dcanvas.height){
+      const dp=dctx.getImageData(dc,dr2,1,1).data;
+      if(dp[3]>0){ el('info').innerHTML=`<b>${name}:</b> ${(dp[0]/255*dVmax).toFixed(2)} ${u}`; return; }
+    }
+  }
   const band=nearestBand(px[0],px[1],px[2],v);
   el('info').innerHTML=band?`<b>${name}:</b> ${band[0]}–${band[1]} ${u}`:`<b>${name}:</b> —`;
 });
@@ -266,17 +279,19 @@ function bandVal(v,r,g,b){ const bd=nearestBand(r,g,b,v); if(!bd) return null;
 const _sCanvas=document.createElement('canvas'); let _sctx=null;
 function _loadImg(url){ return new Promise((res,rej)=>{ const im=new Image(); im.crossOrigin='anonymous';
   im.onload=()=>res(im); im.onerror=rej; im.src=url; }); }
-async function seriesAt(evk,sc,v,col,row){
+async function seriesAt(evk,sc,v,fx,fy){
   const set=store[`${evk}_${sc}`] && store[`${evk}_${sc}`][v]; if(!set) return null;
-  const out=[];
+  const vmax=set.vmax, out=[];
   for(const fr of set.frames){
-    let im; try{ im=await _loadImg(fr.url);}catch(e){ out.push({t:fr.t,val:null}); continue; }
+    const url=fr.data||fr.url, exact=(!!fr.data && vmax!=null);
+    let im; try{ im=await _loadImg(url);}catch(e){ out.push({t:fr.t,val:null}); continue; }
     if(_sCanvas.width!==im.naturalWidth){ _sCanvas.width=im.naturalWidth; _sCanvas.height=im.naturalHeight;
       _sctx=_sCanvas.getContext('2d',{willReadFrequently:true}); }
     _sctx.clearRect(0,0,_sCanvas.width,_sCanvas.height); _sctx.drawImage(im,0,0);
-    const c=Math.max(0,Math.min(col,_sCanvas.width-1)), r2=Math.max(0,Math.min(row,_sCanvas.height-1));
+    const c=Math.max(0,Math.min(Math.floor(fx*im.naturalWidth),im.naturalWidth-1)),
+          r2=Math.max(0,Math.min(Math.floor(fy*im.naturalHeight),im.naturalHeight-1));
     const px=_sctx.getImageData(c,r2,1,1).data;
-    out.push({t:fr.t, val: px[3]===0?null:bandVal(v,px[0],px[1],px[2])});
+    out.push({t:fr.t, val: px[3]===0?null:(exact ? +(px[0]/255*vmax).toFixed(2) : bandVal(v,px[0],px[1],px[2]))});
   }
   return out;
 }
@@ -306,16 +321,14 @@ map.on('click',async e=>{
   const ref=store[`${ev}_historical`] && store[`${ev}_historical`][v]; if(!ref) return;
   const p=L.CRS.EPSG3857.project(e.latlng), [[s,w],[n,ee]]=(ref.bounds||BOUNDS);
   const pw=L.CRS.EPSG3857.project(L.latLng(s,w)), pe=L.CRS.EPSG3857.project(L.latLng(n,ee));
-  const dim=await _loadImg(ref.frames[0].url);
-  const col=Math.floor((p.x-pw.x)/(pe.x-pw.x)*dim.naturalWidth);
-  const row=Math.floor((pe.y-p.y)/(pe.y-pw.y)*dim.naturalHeight);
-  if(col<0||row<0||col>=dim.naturalWidth||row>=dim.naturalHeight) return;
+  const fx=(p.x-pw.x)/(pe.x-pw.x), fy=(pe.y-p.y)/(pe.y-pw.y);
+  if(fx<0||fy<0||fx>1||fy>1) return;
   if(clickMarker) map.removeLayer(clickMarker);
   clickMarker=L.circleMarker(e.latlng,{radius:5,color:'#111',weight:2,fillColor:'#fff',fillOpacity:1}).addTo(map);
   const name=(v.indexOf('overland')===0?'Overland flood':{depth:'Depth',rise:'Rise',wind:'Wind'}[v]);
   const pop=L.popup({maxWidth:320,minWidth:300}).setLatLng(e.latlng)
     .setContent(`<b>${name} time series</b><br><span style="font:11px system-ui;color:#667">${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)} — sampling…</span>`).openOn(map);
-  const [hist,future]=await Promise.all([seriesAt(ev,'historical',v,col,row), seriesAt(ev,'future',v,col,row)]);
+  const [hist,future]=await Promise.all([seriesAt(ev,'historical',v,fx,fy), seriesAt(ev,'future',v,fx,fy)]);
   pop.setContent(`<b>${name} time series</b> <span style="font:11px system-ui;color:#667">(${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)})</span><br>${sparkline(hist,future,v)}`);
 });
 
@@ -323,7 +336,17 @@ async function loadOne(evk,sc,v){
   const r=await fetch(`${DATA_DIR}${evk}_${sc}/manifest_${v}.json`,{cache:'no-store'});
   if(!r.ok) return null;
   const m=await r.json();
-  return {units:m.units, bounds:m.bounds||null, frames:m.frames.map(fr=>({t:fr.t,url:`${DATA_DIR}${evk}_${sc}/${fr.png}`}))};
+  const frames=m.frames.map(fr=>({t:fr.t,url:`${DATA_DIR}${evk}_${sc}/${fr.png}`}));
+  // attach exact-value numeric tiles (overland reuses the depth tiles = same total depth)
+  let vmax=null;
+  const dvar=(v.indexOf('overland')===0)?'depth':v;
+  if(dvar==='depth'||dvar==='rise'||dvar==='wind'){
+    try{ const dr=await fetch(`${DATA_DIR}${evk}_${sc}/datamanifest_${dvar}.json`,{cache:'no-store'});
+      if(dr.ok){ const dm=await dr.json(); vmax=dm.vmax;
+        (dm.frames||[]).forEach((df,k)=>{ if(frames[k]) frames[k].data=`${DATA_DIR}${evk}_${sc}/${df.data}`; }); }
+    }catch(e){}
+  }
+  return {units:m.units, bounds:m.bounds||null, vmax, frames};
 }
 (async function init(){
   drawLegend();
