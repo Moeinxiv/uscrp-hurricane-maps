@@ -1,25 +1,126 @@
 {
- "event": "harvey",
- "scenario": "future",
- "variable": "overland_hybrid",
- "units": "m",
- "bounds": [
-  [
-   28.974991429868123,
-   -94.33611991576419
+  "event": "Harvey",
+  "scenario": "future",
+  "variable": "overland_hybrid",
+  "units": "m",
+  "bounds": [
+    [
+      28.974991429868123,
+      -94.33611991576419
+    ],
+    [
+      30.227087808884963,
+      -93.48667298310077
+    ]
   ],
-  [
-   30.227087808884963,
-   -93.48667298310077
+  "crs": "EPSG:3857",
+  "step_hours": 6.0,
+  "colormap": "depth9",
+  "cumulative_max": true,
+  "frames": [
+    {
+      "t": "2017-08-23 00:00 UTC",
+      "png": "overland_hybrid/frame_000.png"
+    },
+    {
+      "t": "2017-08-23 06:00 UTC",
+      "png": "overland_hybrid/frame_001.png"
+    },
+    {
+      "t": "2017-08-23 12:00 UTC",
+      "png": "overland_hybrid/frame_002.png"
+    },
+    {
+      "t": "2017-08-23 18:00 UTC",
+      "png": "overland_hybrid/frame_003.png"
+    },
+    {
+      "t": "2017-08-24 00:00 UTC",
+      "png": "overland_hybrid/frame_004.png"
+    },
+    {
+      "t": "2017-08-24 06:00 UTC",
+      "png": "overland_hybrid/frame_005.png"
+    },
+    {
+      "t": "2017-08-24 12:00 UTC",
+      "png": "overland_hybrid/frame_006.png"
+    },
+    {
+      "t": "2017-08-24 18:00 UTC",
+      "png": "overland_hybrid/frame_007.png"
+    },
+    {
+      "t": "2017-08-25 00:00 UTC",
+      "png": "overland_hybrid/frame_008.png"
+    },
+    {
+      "t": "2017-08-25 06:00 UTC",
+      "png": "overland_hybrid/frame_009.png"
+    },
+    {
+      "t": "2017-08-25 12:00 UTC",
+      "png": "overland_hybrid/frame_010.png"
+    },
+    {
+      "t": "2017-08-25 18:00 UTC",
+      "png": "overland_hybrid/frame_011.png"
+    },
+    {
+      "t": "2017-08-26 00:00 UTC",
+      "png": "overland_hybrid/frame_012.png"
+    },
+    {
+      "t": "2017-08-26 06:00 UTC",
+      "png": "overland_hybrid/frame_013.png"
+    },
+    {
+      "t": "2017-08-26 12:00 UTC",
+      "png": "overland_hybrid/frame_014.png"
+    },
+    {
+      "t": "2017-08-26 18:00 UTC",
+      "png": "overland_hybrid/frame_015.png"
+    },
+    {
+      "t": "2017-08-27 00:00 UTC",
+      "png": "overland_hybrid/frame_016.png"
+    },
+    {
+      "t": "2017-08-27 06:00 UTC",
+      "png": "overland_hybrid/frame_017.png"
+    },
+    {
+      "t": "2017-08-27 12:00 UTC",
+      "png": "overland_hybrid/frame_018.png"
+    },
+    {
+      "t": "2017-08-27 18:00 UTC",
+      "png": "overland_hybrid/frame_019.png"
+    },
+    {
+      "t": "2017-08-28 00:00 UTC",
+      "png": "overland_hybrid/frame_020.png"
+    },
+    {
+      "t": "2017-08-28 06:00 UTC",
+      "png": "overland_hybrid/frame_021.png"
+    },
+    {
+      "t": "2017-08-28 12:00 UTC",
+      "png": "overland_hybrid/frame_022.png"
+    },
+    {
+      "t": "2017-08-28 18:00 UTC",
+      "png": "overland_hybrid/frame_023.png"
+    },
+    {
+      "t": "2017-08-29 00:00 UTC",
+      "png": "overland_hybrid/frame_024.png"
+    },
+    {
+      "t": "2017-08-29 06:00 UTC",
+      "png": "overland_hybrid/frame_025.png"
+    }
   ]
- ],
- "crs": "EPSG:3857",
- "colormap": "depth9",
- "note": "Storm-driven flooding in color; permanent water shown grey for context.",
- "frames": [
-  {
-   "t": "Event max",
-   "png": "overland_hybrid/frame_000.png"
-  }
- ]
 }

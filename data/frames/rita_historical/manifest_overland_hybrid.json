@@ -1,25 +1,86 @@
 {
- "event": "rita",
- "scenario": "historical",
- "variable": "overland_hybrid",
- "units": "m",
- "bounds": [
-  [
-   28.974991429868123,
-   -94.33611991576419
+  "event": "Rita",
+  "scenario": "historical",
+  "variable": "overland_hybrid",
+  "units": "m",
+  "bounds": [
+    [
+      28.974991429868123,
+      -94.33611991576419
+    ],
+    [
+      30.227087808884963,
+      -93.48667298310077
+    ]
   ],
-  [
-   30.227087808884963,
-   -93.48667298310077
+  "crs": "EPSG:3857",
+  "step_hours": 6.0,
+  "colormap": "depth9",
+  "cumulative_max": true,
+  "frames": [
+    {
+      "t": "2005-09-20 00:01 UTC",
+      "png": "overland_hybrid/frame_000.png"
+    },
+    {
+      "t": "2005-09-20 06:01 UTC",
+      "png": "overland_hybrid/frame_001.png"
+    },
+    {
+      "t": "2005-09-20 12:01 UTC",
+      "png": "overland_hybrid/frame_002.png"
+    },
+    {
+      "t": "2005-09-20 18:01 UTC",
+      "png": "overland_hybrid/frame_003.png"
+    },
+    {
+      "t": "2005-09-21 00:01 UTC",
+      "png": "overland_hybrid/frame_004.png"
+    },
+    {
+      "t": "2005-09-21 06:01 UTC",
+      "png": "overland_hybrid/frame_005.png"
+    },
+    {
+      "t": "2005-09-21 12:01 UTC",
+      "png": "overland_hybrid/frame_006.png"
+    },
+    {
+      "t": "2005-09-21 18:01 UTC",
+      "png": "overland_hybrid/frame_007.png"
+    },
+    {
+      "t": "2005-09-22 00:01 UTC",
+      "png": "overland_hybrid/frame_008.png"
+    },
+    {
+      "t": "2005-09-22 06:01 UTC",
+      "png": "overland_hybrid/frame_009.png"
+    },
+    {
+      "t": "2005-09-22 12:01 UTC",
+      "png": "overland_hybrid/frame_010.png"
+    },
+    {
+      "t": "2005-09-22 18:01 UTC",
+      "png": "overland_hybrid/frame_011.png"
+    },
+    {
+      "t": "2005-09-23 00:01 UTC",
+      "png": "overland_hybrid/frame_012.png"
+    },
+    {
+      "t": "2005-09-23 06:01 UTC",
+      "png": "overland_hybrid/frame_013.png"
+    },
+    {
+      "t": "2005-09-23 12:01 UTC",
+      "png": "overland_hybrid/frame_014.png"
+    },
+    {
+      "t": "2005-09-23 18:01 UTC",
+      "png": "overland_hybrid/frame_015.png"
+    }
   ]
- ],
- "crs": "EPSG:3857",
- "colormap": "depth9",
- "note": "Storm-driven flooding in color; permanent water shown grey for context.",
- "frames": [
-  {
-   "t": "Event max",
-   "png": "overland_hybrid/frame_000.png"
-  }
- ]
 }
