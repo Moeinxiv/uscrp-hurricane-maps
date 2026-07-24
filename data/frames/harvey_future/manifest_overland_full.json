@@ -1,0 +1,25 @@
+{
+ "event": "harvey",
+ "scenario": "future",
+ "variable": "overland_full",
+ "units": "m",
+ "bounds": [
+  [
+   28.974991429868123,
+   -94.33611991576419
+  ],
+  [
+   30.227087808884963,
+   -93.48667298310077
+  ]
+ ],
+ "crs": "EPSG:3857",
+ "colormap": "depth9",
+ "note": "Overland max water depth over the full event (corrected full-extent mesh, no clip / no datum offset). Includes permanent water bodies, so all storms look similar in the Gulf.",
+ "frames": [
+  {
+   "t": "Event max",
+   "png": "overland_full/frame_000.png"
+  }
+ ]
+}

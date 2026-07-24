@@ -1,0 +1,25 @@
+{
+ "event": "rita",
+ "scenario": "historical",
+ "variable": "overland_hybrid",
+ "units": "m",
+ "bounds": [
+  [
+   28.974991429868123,
+   -94.33611991576419
+  ],
+  [
+   30.227087808884963,
+   -93.48667298310077
+  ]
+ ],
+ "crs": "EPSG:3857",
+ "colormap": "depth9",
+ "note": "Storm-driven flooding in color; permanent water shown grey for context.",
+ "frames": [
+  {
+   "t": "Event max",
+   "png": "overland_hybrid/frame_000.png"
+  }
+ ]
+}
