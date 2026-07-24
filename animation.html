@@ -138,16 +138,16 @@ const VARS=["depth","rise","wind","overland_full","overland_flood","overland_hyb
 const BOUNDS=[[28.974991429868123,-94.33611991576419],[30.227087808884963,-93.48667298310077]];
 const DEPTH_RAMP=[[0.1,1,[70,98,216]],[1,2,[53,171,248]],[2,3,[27,229,181]],[3,4,[116,254,93]],
   [4,5,[201,239,52]],[5,7.5,[251,185,56]],[7.5,10,[245,105,24]],[10,15,[201,41,3]],[15,99,[122,4,3]]];
-const WIND_SVMAX=40, WIND_STOPS=[[0,[48,18,59]],[0.09,[62,73,204]],[0.18,[38,130,239]],[0.27,[28,183,218]],[0.36,[46,229,157]],[0.45,[122,251,98]],[0.55,[191,251,54]],[0.64,[238,220,45]],[0.73,[250,158,44]],[0.82,[247,98,31]],[0.91,[221,48,18]],[1,[150,15,8]]];
+const WIND_SVMAX=55, WIND_STOPS=[[0,[48,18,59]],[0.09,[62,73,204]],[0.18,[38,130,239]],[0.27,[28,183,218]],[0.36,[46,229,157]],[0.45,[122,251,98]],[0.55,[191,251,54]],[0.64,[238,220,45]],[0.73,[250,158,44]],[0.82,[247,98,31]],[0.91,[221,48,18]],[1,[150,15,8]]];
 function windColor(sp){let f=Math.max(0,Math.min(1,sp/WIND_SVMAX));for(let i=1;i<WIND_STOPS.length;i++){if(f<=WIND_STOPS[i][0]){const a=WIND_STOPS[i-1],b=WIND_STOPS[i],t=(f-a[0])/((b[0]-a[0])||1);return [Math.round(a[1][0]+(b[1][0]-a[1][0])*t),Math.round(a[1][1]+(b[1][1]-a[1][1])*t),Math.round(a[1][2]+(b[1][2]-a[1][2])*t)];}}return WIND_STOPS[11][1];}
-const WIND_RAMP=[[0,5],[5,10],[10,15],[15,20],[20,25],[25,30],[30,35],[35,99]].map(([lo,hi])=>[lo,hi,windColor(hi>=99?38:(lo+hi)/2)]);
+const WIND_RAMP=[[0,7],[7,14],[14,21],[21,28],[28,35],[35,42],[42,49],[49,99]].map(([lo,hi])=>[lo,hi,windColor(hi>=99?52:(lo+hi)/2)]);
 const RISE_RAMP=[[0.05,0.1,[215,235,255]],[0.1,0.2,[170,205,245]],[0.2,0.3,[110,170,230]],[0.3,0.4,[60,180,170]],
   [0.4,0.5,[120,205,90]],[0.5,0.75,[215,215,70]],[0.75,1.0,[250,170,55]],[1.0,1.5,[240,110,45]],[1.5,99,[200,40,40]]];
 const DIFF_RAMP=[[-99,-0.5,[33,102,172]],[-0.5,-0.2,[103,169,207]],[-0.2,-0.05,[180,210,235]],
   [0.05,0.2,[250,200,170]],[0.2,0.5,[239,138,98]],[0.5,99,[178,24,43]]];
 const VARDEF={depth:{ramp:DEPTH_RAMP,units:'m',legend:'Max water depth (m)',note:'Shows <b>total</b> water depth, which is dominated by the permanent Gulf &amp; bays — so all three storms look similar here <i>by design</i>. To compare storms, switch to <b>Rise</b> (surge above baseline) or <b>Δ Future−Historical</b>.'},
               rise:{ramp:RISE_RAMP,units:'m',legend:'Water rise (m)'},
-              wind:{ramp:WIND_RAMP,units:'m/s',legend:'Wind speed (m/s)',note:'Animated <b>flow field</b> — particles stream along the wind direction; colour &amp; shading show speed. Press play to sweep through the storm; hover for exact m/s.'},
+              wind:{ramp:WIND_RAMP,units:'m/s',legend:'Wind speed (m/s)',note:'Animated <b>flow field</b> — particles stream along the wind direction; colour &amp; shading show speed. Press play to sweep through the storm; <b>zoom out</b> to watch the whole system cross the Gulf. Hover for exact m/s.'},
               diff:{ramp:DIFF_RAMP,units:'m',legend:'Future − Historical (m)',diverging:true},
               overland_full:{ramp:DEPTH_RAMP,units:'m',legend:'Overland depth — full (m)',note:'Corrected full-extent overland max depth (fixes the Rita clip &amp; Ike datum offset). Includes permanent water, so the Gulf looks similar across storms — switch style to <b>Flood-only</b> or <b>Hybrid</b> to isolate storm-driven flooding.'},
               overland_flood:{ramp:DEPTH_RAMP,units:'m',legend:'Storm flood depth (m)',note:'Storm-driven flooding only — permanent open water removed. <b>Rita</b> floods far more than Harvey/Ike, which barely flood overland in this Sabine domain.'},
@@ -221,7 +221,7 @@ const flowCanvas=document.createElement('canvas');
 flowCanvas.style.cssText='position:absolute;left:0;top:0;pointer-events:none;z-index:450;display:none';
 map.getContainer().appendChild(flowCanvas);
 const fctx=flowCanvas.getContext('2d');
-let flowField=null, flowMerc=null, particles=[], flowOn=false, flowRAF=null;
+let flowField=null, flowMerc=null, particles=[], flowOn=false, flowRAF=null, flowView=null;
 const N_PARTICLES=3200, MAX_AGE=110, FLOW_K=62;
 function setFlowMerc(bnds){
   const a=L.CRS.EPSG3857.project(L.latLng(bnds[0][0],bnds[0][1]));
@@ -249,11 +249,19 @@ function sampleUV(xf,yf){
   const v=V[i00]*(1-tx)*(1-ty)+V[i10]*tx*(1-ty)+V[i01]*(1-tx)*ty+V[i11]*tx*ty;
   return [u,v];
 }
-function spawnP(p){ p.x=Math.random(); p.y=Math.random(); p.age=(Math.random()*MAX_AGE)|0; }
+function spawnP(p){ const V=flowView;
+  if(V){ p.x=V.x0+Math.random()*(V.x1-V.x0); p.y=V.y0+Math.random()*(V.y1-V.y0); }
+  else { p.x=Math.random(); p.y=Math.random(); }
+  p.age=(Math.random()*MAX_AGE)|0; }
 function resizeFlow(){ const s=map.getSize(); flowCanvas.width=s.x; flowCanvas.height=s.y; }
 function flowStep(){
   if(!flowOn||!flowField||!flowMerc) return;
   const {xw,xe,yn,ys}=flowMerc, spanX=xe-xw, spanY=yn-ys;
+  const vb=map.getBounds();
+  const vsw=L.CRS.EPSG3857.project(vb.getSouthWest()), vne=L.CRS.EPSG3857.project(vb.getNorthEast());
+  const vx0=Math.max(xw,Math.min(vsw.x,vne.x)), vx1=Math.min(xe,Math.max(vsw.x,vne.x));
+  const vy0=Math.max(ys,Math.min(vsw.y,vne.y)), vy1=Math.min(yn,Math.max(vsw.y,vne.y));
+  flowView=(vx1>vx0&&vy1>vy0)?{x0:(vx0-xw)/spanX,x1:(vx1-xw)/spanX,y0:(yn-vy1)/spanY,y1:(yn-vy0)/spanY}:null;
   const nw=map.latLngToContainerPoint(L.CRS.EPSG3857.unproject(L.point(xw,yn)));
   const se=map.latLngToContainerPoint(L.CRS.EPSG3857.unproject(L.point(xe,ys)));
   const sx=se.x-nw.x, sy=se.y-nw.y;
