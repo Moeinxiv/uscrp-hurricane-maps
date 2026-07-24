@@ -1,0 +1,22 @@
+{
+ "variable": "diff",
+ "vmax": 2.0,
+ "signed": true,
+ "units": "m",
+ "bounds": [
+  [
+   28.974991429868123,
+   -94.33611991576419
+  ],
+  [
+   30.227087808884963,
+   -93.48667298310077
+  ]
+ ],
+ "frames": [
+  {
+   "t": "Future - Historical (peak depth)",
+   "data": "diff_data/frame_000.png"
+  }
+ ]
+}

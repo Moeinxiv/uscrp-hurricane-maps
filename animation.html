@@ -175,7 +175,7 @@ hImg.crossOrigin='anonymous';
 hImg.onload=()=>{ hcanvas.width=hImg.naturalWidth; hcanvas.height=hImg.naturalHeight;
   hctx=hcanvas.getContext('2d',{willReadFrequently:true}); hctx.drawImage(hImg,0,0); hReady=true; };
 // exact-value data tile for the current frame (8-bit LA png; value = R/255*dVmax where alpha>0)
-const dcanvas=document.createElement('canvas'); let dctx=null, dImg=new Image(), dReady=false, dVmax=null;
+const dcanvas=document.createElement('canvas'); let dctx=null, dImg=new Image(), dReady=false, dVmax=null, dSigned=false;
 dImg.crossOrigin='anonymous';
 dImg.onload=()=>{ dcanvas.width=dImg.naturalWidth; dcanvas.height=dImg.naturalHeight;
   dctx=dcanvas.getContext('2d',{willReadFrequently:true}); dctx.drawImage(dImg,0,0); dReady=true; };
@@ -220,7 +220,7 @@ function showFrame(i){
   const f=set.frames[idx];
   overlay.setBounds(curBounds());
   overlay.setUrl(f.url); hReady=false; hImg.src=f.url;
-  dReady=false; dctx=null; if(f.data){ dVmax=set.vmax; dImg.src=f.data; } else { dVmax=null; }
+  dReady=false; dctx=null; if(f.data){ dVmax=set.vmax; dSigned=!!set.signed; dImg.src=f.data; } else { dVmax=null; }
   el('scrub').max=set.frames.length-1; el('scrub').value=idx;
   el('tlabel').textContent=f.t||`frame ${idx+1}/${set.frames.length}`;
   drawRose();
@@ -266,7 +266,7 @@ map.on('mousemove',e=>{
     const dc=Math.floor((p.x-pw.x)/(pe.x-pw.x)*dcanvas.width), dr2=Math.floor((pe.y-p.y)/(pe.y-pw.y)*dcanvas.height);
     if(dc>=0&&dr2>=0&&dc<dcanvas.width&&dr2<dcanvas.height){
       const dp=dctx.getImageData(dc,dr2,1,1).data;
-      if(dp[3]>0){ el('info').innerHTML=`<b>${name}:</b> ${(dp[0]/255*dVmax).toFixed(2)} ${u}`; return; }
+      if(dp[3]>0){ const val=dSigned?(dp[0]/255*2*dVmax-dVmax):(dp[0]/255*dVmax); const sg=(dSigned&&val>0)?'+':''; el('info').innerHTML=`<b>${name}:</b> ${sg}${val.toFixed(2)} ${u}`; return; }
     }
   }
   const band=nearestBand(px[0],px[1],px[2],v);
@@ -338,15 +338,15 @@ async function loadOne(evk,sc,v){
   const m=await r.json();
   const frames=m.frames.map(fr=>({t:fr.t,url:`${DATA_DIR}${evk}_${sc}/${fr.png}`}));
   // attach exact-value numeric tiles (overland reuses the depth tiles = same total depth)
-  let vmax=null;
+  let vmax=null, signed=false;
   const dvar=(v.indexOf('overland')===0)?'depth':v;
-  if(dvar==='depth'||dvar==='rise'||dvar==='wind'){
+  if(dvar==='depth'||dvar==='rise'||dvar==='wind'||dvar==='diff'){
     try{ const dr=await fetch(`${DATA_DIR}${evk}_${sc}/datamanifest_${dvar}.json`,{cache:'no-store'});
-      if(dr.ok){ const dm=await dr.json(); vmax=dm.vmax;
+      if(dr.ok){ const dm=await dr.json(); vmax=dm.vmax; signed=!!dm.signed;
         (dm.frames||[]).forEach((df,k)=>{ if(frames[k]) frames[k].data=`${DATA_DIR}${evk}_${sc}/${df.data}`; }); }
     }catch(e){}
   }
-  return {units:m.units, bounds:m.bounds||null, vmax, frames};
+  return {units:m.units, bounds:m.bounds||null, vmax, signed, frames};
 }
 (async function init(){
   drawLegend();
