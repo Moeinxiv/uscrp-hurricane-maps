@@ -7,43 +7,54 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
+  :root{
+    --ink:#111826; --muted:#6b7480; --faint:#98a1ac;
+    --line:rgba(17,24,38,.07); --line2:rgba(17,24,38,.11);
+    --surface:rgba(255,255,255,.70); --accent:#2f6bd8;
+    --radius:16px; --shadow:0 6px 26px rgba(17,24,38,.11),0 1px 2px rgba(17,24,38,.05);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
   html,body,#map{width:100%;height:100%;margin:0;padding:0}
-  #map{background:#eef}
-  .ui-panel{background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-    border:1px solid rgba(255,255,255,.4);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#2c3e50}
-  .ui-panel h4{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:#5c6c7c;
-    border-bottom:1px solid rgba(0,0,0,.08);padding-bottom:6px;text-align:center;font-weight:700}
-  #timeline{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;z-index:9999;width:min(780px,94vw);padding:14px 18px}
-  #timeline .row{display:flex;align-items:center;gap:12px}
-  #playBtn{flex:0 0 auto;width:42px;height:42px;border:none;border-radius:50%;cursor:pointer;background:#3498db;
-    color:#fff;font-size:16px;box-shadow:0 2px 6px rgba(52,152,219,.45);transition:background .2s,transform .1s}
-  #playBtn:hover{background:#2980b9;transform:scale(1.05)}
+  #map{background:#eef2f5;font-family:var(--font)}
+  .ui-panel{background:var(--surface);backdrop-filter:blur(16px) saturate(1.15);-webkit-backdrop-filter:blur(16px) saturate(1.15);
+    border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+    font-family:var(--font);color:var(--ink)}
+  .ui-panel h4{margin:0 0 11px;font-size:10px;text-transform:uppercase;letter-spacing:1.3px;color:var(--faint);
+    text-align:left;font-weight:600}
+  #timeline{position:absolute;left:50%;transform:translateX(-50%);bottom:20px;z-index:9999;width:min(720px,92vw);padding:14px 18px}
+  #timeline .row{display:flex;align-items:center;gap:14px}
+  #playBtn{flex:0 0 auto;width:40px;height:40px;border:none;border-radius:50%;cursor:pointer;background:var(--ink);
+    color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;transition:transform .12s ease,opacity .2s}
+  #playBtn:hover{opacity:.86;transform:scale(1.06)}
   #scrub{flex:1 1 auto}
-  #tlabel{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;min-width:165px;text-align:right}
-  input[type=range]{-webkit-appearance:none;height:6px;border-radius:4px;background:#e2e8f0;outline:none}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#3498db;cursor:pointer;box-shadow:0 2px 5px rgba(52,152,219,.4)}
-  input[type=range]::-moz-range-thumb{width:18px;height:18px;border:none;border-radius:50%;background:#3498db;cursor:pointer}
-  #timeline .controls{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:14px;font-size:12px;color:#34495e;flex-wrap:wrap}
-  #timeline .controls label{display:flex;align-items:center;gap:6px;font-weight:600}
-  .seg{display:inline-flex;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden}
-  .seg button{border:none;background:#fff;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:600;color:#5c6c7c}
-  .seg button.active{background:#3498db;color:#fff}
-  #ctrl{position:absolute;top:14px;right:14px;z-index:9999;padding:14px 16px;width:230px}
-  #ctrl .grp{margin-bottom:12px}
+  #tlabel{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:600;min-width:160px;text-align:right;color:var(--ink)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:3px;background:var(--line2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(47,107,216,.45)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--accent);cursor:pointer}
+  #timeline .controls{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:14px;font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+  #timeline .controls label{display:flex;align-items:center;gap:6px;font-weight:500}
+  select{font:inherit;font-size:11.5px;color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:3px 7px;background:#fff}
+  .seg{display:inline-flex;background:rgba(17,24,38,.045);border:1px solid var(--line);border-radius:11px;padding:2px;gap:2px}
+  .seg button{border:none;background:transparent;padding:5px 11px;cursor:pointer;font-size:11.5px;font-weight:500;color:var(--muted);border-radius:8px;transition:background .15s,color .15s,box-shadow .15s}
+  .seg button:hover{color:var(--ink)}
+  .seg button.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(17,24,38,.14);font-weight:600}
+  #ctrl{position:absolute;top:16px;right:16px;z-index:9999;padding:17px 18px;width:238px}
+  #ctrl .grp{margin-bottom:16px}
   #ctrl .grp:last-child{margin-bottom:0}
-  #ctrl .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5c6c7c;margin-bottom:6px}
-  #ctrl label.op{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:#34495e;margin-bottom:5px}
-  #legend{position:absolute;right:14px;bottom:160px;z-index:9999;padding:12px 14px;font-size:12px}
-  #legend .row{display:flex;align-items:center;margin:3px 0}
-  #legend .sw{width:14px;height:14px;border-radius:4px;margin-right:8px;border:1px solid rgba(0,0,0,.15)}
-  #legNote{margin-top:8px;max-width:210px;font-size:10.5px;line-height:1.35;color:#555;border-top:1px solid rgba(0,0,0,.12);padding-top:6px}
+  #ctrl .lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--faint);margin-bottom:8px}
+  #ctrl label.op{display:flex;justify-content:space-between;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:8px}
+  #legend{position:absolute;right:16px;bottom:150px;z-index:9999;padding:14px 16px;font-size:11.5px;width:192px}
+  #legend .row{display:flex;align-items:center;margin:4px 0;color:var(--ink)}
+  #legend .sw{width:12px;height:12px;border-radius:3px;margin-right:9px;border:1px solid rgba(0,0,0,.08);flex:0 0 auto}
+  #legNote{margin-top:10px;font-size:10px;line-height:1.45;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
   #legNote:empty{display:none}
-  #windrose{position:absolute;left:14px;bottom:150px;z-index:9999;padding:9px 11px;width:154px;display:none}
+  #windrose{position:absolute;left:16px;bottom:150px;z-index:9999;padding:11px 13px;width:150px;display:none}
   #windrose canvas{display:block;margin:0 auto}
-  #info{position:absolute;top:14px;left:14px;z-index:9999;padding:10px 14px;font-size:13px;min-width:180px}
+  #info{position:absolute;top:50%;left:16px;transform:translateY(-50%);z-index:9999;padding:12px 15px;font-size:12.5px;min-width:172px;color:var(--ink)}
   #banner{position:absolute;top:0;left:0;right:0;z-index:10000;background:#b45309;color:#fff;
-    font:600 12px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;text-align:center;padding:5px 10px;display:none}
+    font:500 12px/1.4 var(--font);text-align:center;padding:6px 10px;display:none}
+  .leaflet-control-zoom a{border-radius:8px!important;color:var(--muted)!important}
+  .leaflet-bar{border:1px solid var(--line)!important;box-shadow:var(--shadow)!important}
 </style>
 </head>
 <body>
@@ -291,7 +302,7 @@ function sparkline(hist,future,v){
 }
 let clickMarker=null;
 map.on('click',async e=>{
-  const v=(curVar==='diff'?'rise':curVar);
+  const v=(curVar==='diff'?'rise':(curVar==='overland'?'overland_'+omode:curVar));
   const ref=store[`${ev}_historical`] && store[`${ev}_historical`][v]; if(!ref) return;
   const p=L.CRS.EPSG3857.project(e.latlng), [[s,w],[n,ee]]=(ref.bounds||BOUNDS);
   const pw=L.CRS.EPSG3857.project(L.latLng(s,w)), pe=L.CRS.EPSG3857.project(L.latLng(n,ee));
@@ -301,7 +312,7 @@ map.on('click',async e=>{
   if(col<0||row<0||col>=dim.naturalWidth||row>=dim.naturalHeight) return;
   if(clickMarker) map.removeLayer(clickMarker);
   clickMarker=L.circleMarker(e.latlng,{radius:5,color:'#111',weight:2,fillColor:'#fff',fillOpacity:1}).addTo(map);
-  const name={depth:'Depth',rise:'Rise',wind:'Wind'}[v];
+  const name=(v.indexOf('overland')===0?'Overland flood':{depth:'Depth',rise:'Rise',wind:'Wind'}[v]);
   const pop=L.popup({maxWidth:320,minWidth:300}).setLatLng(e.latlng)
     .setContent(`<b>${name} time series</b><br><span style="font:11px system-ui;color:#667">${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)} — sampling…</span>`).openOn(map);
   const [hist,future]=await Promise.all([seriesAt(ev,'historical',v,col,row), seriesAt(ev,'future',v,col,row)]);
