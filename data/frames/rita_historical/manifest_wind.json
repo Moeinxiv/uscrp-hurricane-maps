@@ -15,8 +15,8 @@
  ],
  "crs": "EPSG:3857",
  "step_hours": 6,
- "colormap": "wind9",
- "vectors": true,
+ "colormap": "turbo40",
+ "vectors": false,
  "frames": [
   {
    "t": "2005-09-20 00:01 UTC",

@@ -138,15 +138,16 @@ const VARS=["depth","rise","wind","overland_full","overland_flood","overland_hyb
 const BOUNDS=[[28.974991429868123,-94.33611991576419],[30.227087808884963,-93.48667298310077]];
 const DEPTH_RAMP=[[0.1,1,[70,98,216]],[1,2,[53,171,248]],[2,3,[27,229,181]],[3,4,[116,254,93]],
   [4,5,[201,239,52]],[5,7.5,[251,185,56]],[7.5,10,[245,105,24]],[10,15,[201,41,3]],[15,99,[122,4,3]]];
-const WIND_RAMP=[[0,8,[237,248,251]],[8,17,[179,205,227]],[17,25,[140,150,198]],[25,33,[136,86,167]],
-  [33,43,[129,15,124]],[43,50,[255,178,76]],[50,58,[253,141,60]],[58,70,[240,59,32]],[70,99,[189,0,38]]];
+const WIND_SVMAX=40, WIND_STOPS=[[0,[48,18,59]],[0.09,[62,73,204]],[0.18,[38,130,239]],[0.27,[28,183,218]],[0.36,[46,229,157]],[0.45,[122,251,98]],[0.55,[191,251,54]],[0.64,[238,220,45]],[0.73,[250,158,44]],[0.82,[247,98,31]],[0.91,[221,48,18]],[1,[150,15,8]]];
+function windColor(sp){let f=Math.max(0,Math.min(1,sp/WIND_SVMAX));for(let i=1;i<WIND_STOPS.length;i++){if(f<=WIND_STOPS[i][0]){const a=WIND_STOPS[i-1],b=WIND_STOPS[i],t=(f-a[0])/((b[0]-a[0])||1);return [Math.round(a[1][0]+(b[1][0]-a[1][0])*t),Math.round(a[1][1]+(b[1][1]-a[1][1])*t),Math.round(a[1][2]+(b[1][2]-a[1][2])*t)];}}return WIND_STOPS[11][1];}
+const WIND_RAMP=[[0,5],[5,10],[10,15],[15,20],[20,25],[25,30],[30,35],[35,99]].map(([lo,hi])=>[lo,hi,windColor(hi>=99?38:(lo+hi)/2)]);
 const RISE_RAMP=[[0.05,0.1,[215,235,255]],[0.1,0.2,[170,205,245]],[0.2,0.3,[110,170,230]],[0.3,0.4,[60,180,170]],
   [0.4,0.5,[120,205,90]],[0.5,0.75,[215,215,70]],[0.75,1.0,[250,170,55]],[1.0,1.5,[240,110,45]],[1.5,99,[200,40,40]]];
 const DIFF_RAMP=[[-99,-0.5,[33,102,172]],[-0.5,-0.2,[103,169,207]],[-0.2,-0.05,[180,210,235]],
   [0.05,0.2,[250,200,170]],[0.2,0.5,[239,138,98]],[0.5,99,[178,24,43]]];
 const VARDEF={depth:{ramp:DEPTH_RAMP,units:'m',legend:'Max water depth (m)',note:'Shows <b>total</b> water depth, which is dominated by the permanent Gulf &amp; bays — so all three storms look similar here <i>by design</i>. To compare storms, switch to <b>Rise</b> (surge above baseline) or <b>Δ Future−Historical</b>.'},
               rise:{ramp:RISE_RAMP,units:'m',legend:'Water rise (m)'},
-              wind:{ramp:WIND_RAMP,units:'m/s',legend:'Wind speed (m/s)'},
+              wind:{ramp:WIND_RAMP,units:'m/s',legend:'Wind speed (m/s)',note:'Animated <b>flow field</b> — particles stream along the wind direction; colour &amp; shading show speed. Press play to sweep through the storm; hover for exact m/s.'},
               diff:{ramp:DIFF_RAMP,units:'m',legend:'Future − Historical (m)',diverging:true},
               overland_full:{ramp:DEPTH_RAMP,units:'m',legend:'Overland depth — full (m)',note:'Corrected full-extent overland max depth (fixes the Rita clip &amp; Ike datum offset). Includes permanent water, so the Gulf looks similar across storms — switch style to <b>Flood-only</b> or <b>Hybrid</b> to isolate storm-driven flooding.'},
               overland_flood:{ramp:DEPTH_RAMP,units:'m',legend:'Storm flood depth (m)',note:'Storm-driven flooding only — permanent open water removed. <b>Rita</b> floods far more than Harvey/Ike, which barely flood overland in this Sabine domain.'},
@@ -169,6 +170,7 @@ const gasLayer=L.geoJSON(typeof json_NaturalGas_3!=='undefined'?json_NaturalGas_
 const el=id=>document.getElementById(id);
 let ev='harvey', scen='historical', curVar='rise', omode='full', idx=0, playing=false, timer=null;
 let roseData=null;
+let windStore={};   // windStore["<ev>_<scen>"] = {uvmax, bounds, frames:[{t,url}]}
 let store={};   // store["<ev>_<scen>"][var] = {units, frames:[{t,url}]}
 const hcanvas=document.createElement('canvas'); let hctx=null, hImg=new Image(), hReady=false;
 hImg.crossOrigin='anonymous';
@@ -214,8 +216,80 @@ function drawRose(){
   ctx.fillText('N',cx,cy-R-7); ctx.fillText('S',cx,cy+R+7); ctx.fillText('E',cx+R+8,cy); ctx.fillText('W',cx-R-8,cy);
   el('rosePeak').textContent = fr.peak ? ('peak '+fr.peak+' m/s') : '';
 }
+/* ---- wind particle flow field (Windy-style) ---- */
+const flowCanvas=document.createElement('canvas');
+flowCanvas.style.cssText='position:absolute;left:0;top:0;pointer-events:none;z-index:450;display:none';
+map.getContainer().appendChild(flowCanvas);
+const fctx=flowCanvas.getContext('2d');
+let flowField=null, flowMerc=null, particles=[], flowOn=false, flowRAF=null;
+const N_PARTICLES=3200, MAX_AGE=110, FLOW_K=62;
+function setFlowMerc(bnds){
+  const a=L.CRS.EPSG3857.project(L.latLng(bnds[0][0],bnds[0][1]));
+  const b=L.CRS.EPSG3857.project(L.latLng(bnds[1][0],bnds[1][1]));
+  flowMerc={xw:Math.min(a.x,b.x),xe:Math.max(a.x,b.x),yn:Math.max(a.y,b.y),ys:Math.min(a.y,b.y)};
+}
+function loadFlowField(url,bnds,uvmax){
+  const im=new Image(); im.crossOrigin='anonymous';
+  im.onload=()=>{ const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight;
+    const cx=c.getContext('2d',{willReadFrequently:true}); cx.drawImage(im,0,0);
+    const d=cx.getImageData(0,0,c.width,c.height).data, n=c.width*c.height;
+    const U=new Float32Array(n),V=new Float32Array(n),M=new Uint8Array(n);
+    for(let i=0;i<n;i++){ M[i]=d[i*4+3]>0?1:0; U[i]=(d[i*4]/255*2-1)*uvmax; V[i]=(d[i*4+1]/255*2-1)*uvmax; }
+    flowField={gw:c.width,gh:c.height,U,V,M}; setFlowMerc(bnds);
+  };
+  im.src=url;
+}
+function sampleUV(xf,yf){
+  if(!flowField) return null; const {gw,gh,U,V,M}=flowField;
+  const gx=xf*(gw-1),gy=yf*(gh-1),x0=Math.floor(gx),y0=Math.floor(gy);
+  if(x0<0||y0<0||x0>=gw-1||y0>=gh-1) return null;
+  const tx=gx-x0,ty=gy-y0,i00=y0*gw+x0,i10=i00+1,i01=i00+gw,i11=i01+1;
+  if(!(M[i00]&&M[i10]&&M[i01]&&M[i11])) return null;
+  const u=U[i00]*(1-tx)*(1-ty)+U[i10]*tx*(1-ty)+U[i01]*(1-tx)*ty+U[i11]*tx*ty;
+  const v=V[i00]*(1-tx)*(1-ty)+V[i10]*tx*(1-ty)+V[i01]*(1-tx)*ty+V[i11]*tx*ty;
+  return [u,v];
+}
+function spawnP(p){ p.x=Math.random(); p.y=Math.random(); p.age=(Math.random()*MAX_AGE)|0; }
+function resizeFlow(){ const s=map.getSize(); flowCanvas.width=s.x; flowCanvas.height=s.y; }
+function flowStep(){
+  if(!flowOn||!flowField||!flowMerc) return;
+  const {xw,xe,yn,ys}=flowMerc, spanX=xe-xw, spanY=yn-ys;
+  const nw=map.latLngToContainerPoint(L.CRS.EPSG3857.unproject(L.point(xw,yn)));
+  const se=map.latLngToContainerPoint(L.CRS.EPSG3857.unproject(L.point(xe,ys)));
+  const sx=se.x-nw.x, sy=se.y-nw.y;
+  fctx.globalCompositeOperation='destination-out'; fctx.fillStyle='rgba(0,0,0,0.055)';
+  fctx.fillRect(0,0,flowCanvas.width,flowCanvas.height);
+  fctx.globalCompositeOperation='source-over'; fctx.lineWidth=1.3; fctx.lineCap='round';
+  for(const p of particles){
+    const uv=sampleUV(p.x,p.y); if(!uv){ spawnP(p); continue; }
+    const u=uv[0], v=uv[1], sp=Math.hypot(u,v);
+    const px0=nw.x+p.x*sx, py0=nw.y+p.y*sy;
+    p.x+=(u*FLOW_K)/spanX; p.y-=(v*FLOW_K)/spanY; p.age++;
+    if(p.age>MAX_AGE||p.x<0||p.x>1||p.y<0||p.y>1){ spawnP(p); continue; }
+    const px1=nw.x+p.x*sx, py1=nw.y+p.y*sy;
+    const c=windColor(sp);
+    fctx.strokeStyle='rgba('+c[0]+','+c[1]+','+c[2]+',.9)';
+    fctx.beginPath(); fctx.moveTo(px0,py0); fctx.lineTo(px1,py1); fctx.stroke();
+  }
+}
+function flowLoop(){ if(!flowOn) return; flowStep(); flowRAF=requestAnimationFrame(flowLoop); }
+function startFlow(){ if(flowOn) return; flowOn=true; resizeFlow();
+  particles=Array.from({length:N_PARTICLES},()=>{const p={}; spawnP(p); return p;});
+  flowCanvas.style.display='block'; flowLoop(); }
+function stopFlow(){ flowOn=false; if(flowRAF) cancelAnimationFrame(flowRAF); flowRAF=null;
+  if(fctx) fctx.clearRect(0,0,flowCanvas.width,flowCanvas.height); flowCanvas.style.display='none'; }
+map.on('resize',()=>{ if(flowOn) resizeFlow(); });
+map.on('movestart zoomstart',()=>{ if(flowOn&&fctx) fctx.clearRect(0,0,flowCanvas.width,flowCanvas.height); });
+map.on('move zoom',()=>{ if(flowOn) resizeFlow(); });
+function updateFlow(){
+  const wv=(effVar()==='wind') ? windStore[`${ev}_${scen}`] : null;
+  if(!wv||!wv.frames.length){ stopFlow(); return; }
+  const fi=Math.min(idx,wv.frames.length-1);
+  loadFlowField(wv.frames[fi].url, wv.bounds, wv.uvmax);
+  if(!flowOn) startFlow();
+}
 function showFrame(i){
-  const set=curSet(); if(!set||!set.frames.length){ overlay.setUrl(''); el('tlabel').textContent='no data'; drawRose(); return; }
+  const set=curSet(); if(!set||!set.frames.length){ overlay.setUrl(''); el('tlabel').textContent='no data'; drawRose(); updateFlow(); return; }
   idx=Math.max(0,Math.min(i,set.frames.length-1));
   const f=set.frames[idx];
   overlay.setBounds(curBounds());
@@ -224,6 +298,7 @@ function showFrame(i){
   el('scrub').max=set.frames.length-1; el('scrub').value=idx;
   el('tlabel').textContent=f.t||`frame ${idx+1}/${set.frames.length}`;
   drawRose();
+  updateFlow();
 }
 function play(){ if(playing||!curSet())return; playing=true; el('playBtn').textContent='⏸';
   timer=setInterval(()=>{ const n=curSet().frames.length; showFrame((idx+1)%n); }, +el('speed').value); }
@@ -364,6 +439,13 @@ async function loadOne(evk,sc,v){
     return;
   }
   try{ roseData=await (await fetch('data/wind_rose.json',{cache:'no-store'})).json(); }catch(e){ roseData=null; }
+  for(const evk of EVENTS) for(const sc of SCENARIOS){
+    try{ const r=await fetch(`${DATA_DIR}${evk}_${sc}/datamanifest_windvec.json`,{cache:'no-store'});
+      if(r.ok){ const m=await r.json();
+        windStore[`${evk}_${sc}`]={uvmax:m.uvmax, bounds:m.bounds,
+          frames:(m.frames||[]).map(fr=>({t:fr.t, url:`${DATA_DIR}${evk}_${sc}/${fr.data}`}))}; }
+    }catch(e){}
+  }
   el('mode').textContent='LIVE';
   showFrame(0);
 })();
