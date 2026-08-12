@@ -19,47 +19,95 @@
   .ui-panel{background:var(--surface);backdrop-filter:blur(16px) saturate(1.15);-webkit-backdrop-filter:blur(16px) saturate(1.15);
     border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
     font-family:var(--font);color:var(--ink)}
-  .ui-panel h4{margin:0 0 11px;font-size:10px;text-transform:uppercase;letter-spacing:1.3px;color:var(--faint);
+  .ui-panel h4{margin:0 0 11px;font-size:11.5px;text-transform:uppercase;letter-spacing:1.3px;color:var(--faint);
     text-align:left;font-weight:600}
-  #timeline{position:absolute;left:50%;transform:translateX(-50%);bottom:20px;z-index:9999;width:min(720px,92vw);padding:14px 18px}
+  #timeline{position:absolute;left:50%;transform:translateX(-50%);bottom:20px;z-index:9999;width:min(880px,94vw);padding:16px 20px}
   #timeline .row{display:flex;align-items:center;gap:14px}
-  #playBtn{flex:0 0 auto;width:40px;height:40px;border:none;border-radius:50%;cursor:pointer;background:var(--ink);
-    color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;transition:transform .12s ease,opacity .2s}
+  #playBtn{flex:0 0 auto;width:52px;height:52px;border:none;border-radius:50%;cursor:pointer;background:var(--ink);
+    color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;transition:transform .12s ease,opacity .2s}
   #playBtn:hover{opacity:.86;transform:scale(1.06)}
   #scrub{flex:1 1 auto}
-  #tlabel{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:600;min-width:160px;text-align:right;color:var(--ink)}
-  input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:3px;background:var(--line2);outline:none}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(47,107,216,.45)}
-  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--accent);cursor:pointer}
-  #timeline .controls{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:14px;font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+  #tlabel{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:15px;font-weight:600;min-width:198px;text-align:right;color:var(--ink)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:7px;border-radius:4px;background:var(--line2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(47,107,216,.45)}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border:none;border-radius:50%;background:var(--accent);cursor:pointer}
+  #timeline .controls{display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:14px;font-size:13.5px;color:var(--muted);flex-wrap:wrap}
   #timeline .controls label{display:flex;align-items:center;gap:6px;font-weight:500}
-  select{font:inherit;font-size:11.5px;color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:3px 7px;background:#fff}
+  select{font:inherit;font-size:13.5px;color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:5px 9px;background:#fff}
   .seg{display:inline-flex;background:rgba(17,24,38,.045);border:1px solid var(--line);border-radius:11px;padding:2px;gap:2px}
-  .seg button{border:none;background:transparent;padding:5px 11px;cursor:pointer;font-size:11.5px;font-weight:500;color:var(--muted);border-radius:8px;transition:background .15s,color .15s,box-shadow .15s}
+  .seg button{border:none;background:transparent;padding:9px 15px;cursor:pointer;font-size:14px;font-weight:500;color:var(--muted);border-radius:8px;transition:background .15s,color .15s,box-shadow .15s}
   .seg button:hover{color:var(--ink)}
   .seg button.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(17,24,38,.14);font-weight:600}
-  #ctrl{position:absolute;top:16px;right:16px;z-index:9999;padding:17px 18px;width:238px}
+  #ctrl{position:absolute;top:16px;right:16px;z-index:9999;padding:20px;width:298px;max-height:calc(100vh - 32px);overflow-y:auto}
   #ctrl .grp{margin-bottom:16px}
   #ctrl .grp:last-child{margin-bottom:0}
-  #ctrl .lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--faint);margin-bottom:8px}
-  #ctrl label.op{display:flex;justify-content:space-between;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:8px}
-  #legend{position:absolute;right:16px;bottom:150px;z-index:9999;padding:14px 16px;font-size:11.5px;width:192px}
+  #ctrl label.chk{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:#34495e;margin-bottom:7px}
+  #ctrl label.chk input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer}
+  #ctrl label.chk .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 1px rgba(255,255,255,.9)}
+  #ctrl .lbl{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--faint);margin-bottom:9px}
+  #ctrl label.op{display:flex;justify-content:space-between;font-size:13.5px;font-weight:500;color:var(--muted);margin-bottom:8px}
+  #legend{position:absolute;left:16px;bottom:190px;z-index:9999;padding:16px 18px;font-size:13.5px;width:244px;max-height:44vh;overflow-y:auto}
   #legend .row{display:flex;align-items:center;margin:4px 0;color:var(--ink)}
-  #legend .sw{width:12px;height:12px;border-radius:3px;margin-right:9px;border:1px solid rgba(0,0,0,.08);flex:0 0 auto}
-  #legNote{margin-top:10px;font-size:10px;line-height:1.45;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+  #legend .sw{width:17px;height:17px;border-radius:4px;margin-right:11px;border:1px solid rgba(0,0,0,.08);flex:0 0 auto}
+  #legNote{margin-top:11px;font-size:11.5px;line-height:1.5;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
   #legNote:empty{display:none}
-  #windrose{position:absolute;left:16px;bottom:150px;z-index:9999;padding:11px 13px;width:150px;display:none}
+  #windrose{position:absolute;left:280px;bottom:190px;z-index:9999;padding:13px 15px;width:180px;display:none}
   #windrose canvas{display:block;margin:0 auto}
-  #info{position:absolute;top:50%;left:16px;transform:translateY(-50%);z-index:9999;padding:12px 15px;font-size:12.5px;min-width:172px;color:var(--ink)}
+  #info{position:absolute;top:74px;left:16px;z-index:9999;padding:14px 17px;font-size:15px;min-width:212px;max-width:300px;color:var(--ink)}
   #banner{position:absolute;top:0;left:0;right:0;z-index:10000;background:#b45309;color:#fff;
     font:500 12px/1.4 var(--font);text-align:center;padding:6px 10px;display:none}
-  .leaflet-control-zoom a{border-radius:8px!important;color:var(--muted)!important}
+  .leaflet-control-zoom a{border-radius:8px!important;color:var(--muted)!important;width:36px!important;height:36px!important;line-height:36px!important;font-size:20px!important}
   .leaflet-bar{border:1px solid var(--line)!important;box-shadow:var(--shadow)!important}
+
+  /* --- toolbar (About / Summary) --- */
+  #toolbar{position:absolute;top:16px;left:16px;z-index:9999;display:flex;gap:9px}
+  #toolbar button{font-family:var(--font);font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;
+    background:var(--surface);backdrop-filter:blur(16px) saturate(1.15);-webkit-backdrop-filter:blur(16px) saturate(1.15);
+    border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px 15px;transition:background .15s,transform .12s}
+  #toolbar button:hover{background:#fff;transform:translateY(-1px)}
+  #toolbar button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* --- slide-over cards --- */
+  .card{position:absolute;top:74px;left:16px;z-index:10001;width:min(430px,calc(100vw - 32px));
+    max-height:calc(100vh - 250px);overflow-y:auto;padding:20px 22px;display:none}
+  .card.open{display:block}
+  .card h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.2px}
+  .card h5{margin:16px 0 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;color:var(--faint)}
+  .card p,.card li{font-size:13.5px;line-height:1.55;color:#39424f;margin:6px 0}
+  .card ul{margin:6px 0;padding-left:19px}
+  .card .close{position:absolute;top:14px;right:16px;border:none;background:transparent;font-size:19px;
+    line-height:1;color:var(--faint);cursor:pointer;padding:2px 5px;border-radius:7px}
+  .card .close:hover{background:rgba(17,24,38,.06);color:var(--ink)}
+  .card .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    background:rgba(180,83,9,.12);color:#92400e;border-radius:6px;padding:3px 7px;margin-left:6px}
+  .chartbox{margin:14px 0 4px}
+  .chartbox .ttl{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:2px}
+  .chartbox .sub{font-size:11.5px;color:var(--muted);margin-bottom:5px}
+  .keyline{display:flex;gap:16px;font-size:11.5px;color:var(--muted);margin-top:2px}
+
+  /* --- facility markers --- */
+  .leaflet-popup-content{font-family:var(--font);font-size:13px;line-height:1.5}
+  .fac-pop b{font-size:14px}
+  .fac-tbl{border-collapse:collapse;margin-top:7px;font-size:12px;width:100%}
+  .fac-tbl th{text-align:left;font-weight:600;color:var(--muted);padding:2px 8px 2px 0;font-size:11px;
+    text-transform:uppercase;letter-spacing:.5px}
+  .fac-tbl td{padding:2px 8px 2px 0;font-variant-numeric:tabular-nums}
+  .fac-wet{color:#b42318;font-weight:700}
+  .fac-dry{color:#667085}
+  .fac-src{margin-top:7px;font-size:11px;color:var(--faint)}
 </style>
 </head>
 <body>
 <div id="banner"></div>
 <div id="map"></div>
+
+<div id="toolbar">
+  <button id="btnAbout" title="Plain-language guide to this map">How to read this map</button>
+  <button id="btnSummary" title="Historical vs future, all variables">Summary charts</button>
+</div>
+
+<div id="about" class="card ui-panel"></div>
+<div id="summary" class="card ui-panel"></div>
 <div id="info" class="ui-panel">Hover the map for values…</div>
 
 <div id="ctrl" class="ui-panel">
@@ -93,8 +141,12 @@
     </div>
   </div>
   <div class="grp"><div class="lbl">Infrastructure</div>
-    <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#34495e;margin-bottom:5px"><input type="checkbox" id="pipeCrude" checked> Crude oil pipelines</label>
-    <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#34495e"><input type="checkbox" id="pipeGas" checked> Natural gas pipelines</label>
+    <label class="chk"><input type="checkbox" id="pipeCrude" checked> <span class="dot" style="background:rgba(196,60,57,1)"></span> Crude oil pipelines</label>
+    <label class="chk"><input type="checkbox" id="pipeGas" checked> <span class="dot" style="background:rgba(141,90,153,1)"></span> Natural gas pipelines</label>
+    <label class="chk"><input type="checkbox" id="facWater" checked> <span class="dot" style="background:#1d7fd4"></span> Water treatment plants</label>
+    <label class="chk"><input type="checkbox" id="facWaste" checked> <span class="dot" style="background:#0f9d6e"></span> Wastewater plants</label>
+    <label class="chk"><input type="checkbox" id="facPump" checked> <span class="dot" style="background:#e07b1a"></span> Pumping stations</label>
+    <div style="font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.45">Click any site for its peak flood depth in every storm.</div>
   </div>
   <div class="grp">
     <label class="op"><span>Layer opacity</span><span id="opval">85%</span></label>
@@ -104,7 +156,7 @@
 
 <div id="legend" class="ui-panel"><h4 id="legTitle">Max Depth (m)</h4><div id="legRows"></div><div id="legNote"></div></div>
 
-<div id="windrose" class="ui-panel"><h4>Wind rose — from</h4><canvas id="roseCanvas" width="132" height="132"></canvas><div id="rosePeak" style="text-align:center;font-size:11px;font-weight:600;color:#34495e;margin-top:2px"></div></div>
+<div id="windrose" class="ui-panel"><h4>Wind rose — from</h4><canvas id="roseCanvas" width="158" height="158"></canvas><div id="rosePeak" style="text-align:center;font-size:11px;font-weight:600;color:#34495e;margin-top:2px"></div></div>
 
 <div id="timeline" class="ui-panel">
   <div class="row">
@@ -153,7 +205,8 @@ const VARDEF={depth:{ramp:DEPTH_RAMP,units:'m',legend:'Max water depth (m)',note
               overland_flood:{ramp:DEPTH_RAMP,units:'m',legend:'Storm flood depth (m)',note:'Storm-driven flooding only — permanent open water removed. <b>Rita</b> floods far more than Harvey/Ike, which barely flood overland in this Sabine domain.'},
               overland_hybrid:{ramp:DEPTH_RAMP,units:'m',legend:'Storm flood depth (m)',note:'Storm-driven flooding in color; permanent water shown <span style="color:#8a9aa6">grey</span> for context.'}};
 
-const map=L.map('map',{zoomControl:true}).fitBounds(BOUNDS);
+const map=L.map('map',{zoomControl:false}).fitBounds(BOUNDS);
+L.control.zoom({position:'bottomright'}).addTo(map);
 L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}{r}.png',
   {subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(map);
 let overlay=L.imageOverlay('',BOUNDS,{opacity:0.85,interactive:false}).addTo(map);
@@ -161,10 +214,10 @@ let overlay=L.imageOverlay('',BOUNDS,{opacity:0.85,interactive:false}).addTo(map
 // --- infrastructure (pipelines), drawn above the animated depth/wind layer ---
 map.createPane('pipes'); map.getPane('pipes').style.zIndex=500;
 const crudeLayer=L.geoJSON(typeof json_CrudeOil_4!=='undefined'?json_CrudeOil_4:null,{pane:'pipes',
-  style:{color:'rgba(196,60,57,1)',weight:1.3,opacity:1,fillOpacity:0},
+  style:{color:'rgba(196,60,57,1)',weight:2.6,opacity:1,fillOpacity:0},
   onEachFeature:(f,l)=>{const p=f.properties||{};l.bindPopup(`<b>Crude oil pipeline</b><br>${p.Opername||''}${p.Pipename?'<br>'+p.Pipename:''}`);}}).addTo(map);
 const gasLayer=L.geoJSON(typeof json_NaturalGas_3!=='undefined'?json_NaturalGas_3:null,{pane:'pipes',
-  style:{color:'rgba(141,90,153,1)',weight:1,opacity:1,fillOpacity:0},
+  style:{color:'rgba(141,90,153,1)',weight:2.2,opacity:1,fillOpacity:0},
   onEachFeature:(f,l)=>{const p=f.properties||{};l.bindPopup(`<b>Natural gas pipeline</b><br>${p.TYPEPIPE||''}${(p.Operator||p.Status)?'<br>'+(p.Operator||p.Status):''}`);}}).addTo(map);
 
 const el=id=>document.getElementById(id);
@@ -322,7 +375,7 @@ function seg(id,attr,setter){ el(id).addEventListener('click',e=>{ const b=e.tar
   [...el(id).children].forEach(x=>x.classList.remove('active')); b.classList.add('active'); setter(b.dataset[attr]);
   drawLegend(); showFrame(0); }); }
 function updModeVis(){ el('modegrp').style.display=(curVar==='overland'&&scen!=='diff')?'block':'none'; }
-seg('eventseg','ev',v=>ev=v);
+seg('eventseg','ev',v=>{ ev=v; if(el('summary').classList.contains('open')) buildSummary(); });
 seg('scenseg','scen',v=>{ scen=v; const d=(v==='diff');
   el('varseg').style.opacity=d?0.4:1; el('varseg').style.pointerEvents=d?'none':'auto'; updModeVis(); });
 seg('varseg','var',v=>{ curVar=v; updModeVis(); });
@@ -360,25 +413,29 @@ map.on('mousemove',e=>{
 function bandVal(v,r,g,b){ const bd=nearestBand(r,g,b,v); if(!bd) return null;
   let [lo,hi]=bd; if(hi>=99) return lo; if(lo<=-99) return hi; return +((lo+hi)/2).toFixed(2); }
 const _sCanvas=document.createElement('canvas'); let _sctx=null;
-function _loadImg(url){ return new Promise((res,rej)=>{ const im=new Image(); im.crossOrigin='anonymous';
-  im.onload=()=>res(im); im.onerror=rej; im.src=url; }); }
+const _imgCache=new Map();
+function _loadImg(url){ if(_imgCache.has(url)) return _imgCache.get(url);
+  const p=new Promise((res,rej)=>{ const im=new Image(); im.crossOrigin='anonymous';
+    im.onload=()=>res(im); im.onerror=rej; im.src=url; });
+  _imgCache.set(url,p); return p; }
 async function seriesAt(evk,sc,v,fx,fy){
   const set=store[`${evk}_${sc}`] && store[`${evk}_${sc}`][v]; if(!set) return null;
-  const vmax=set.vmax, out=[];
-  for(const fr of set.frames){
-    const url=fr.data||fr.url, exact=(!!fr.data && vmax!=null);
-    let im; try{ im=await _loadImg(url);}catch(e){ out.push({t:fr.t,val:null}); continue; }
-    if(_sCanvas.width!==im.naturalWidth){ _sCanvas.width=im.naturalWidth; _sCanvas.height=im.naturalHeight;
+  const vmax=set.vmax;
+  const imgs=await Promise.all(set.frames.map(fr=>_loadImg(fr.data||fr.url).catch(()=>null)));
+  return set.frames.map((fr,i)=>{
+    const im=imgs[i], exact=(!!fr.data && vmax!=null);
+    if(!im) return {t:fr.t,val:null};
+    if(_sCanvas.width!==im.naturalWidth||_sCanvas.height!==im.naturalHeight){
+      _sCanvas.width=im.naturalWidth; _sCanvas.height=im.naturalHeight;
       _sctx=_sCanvas.getContext('2d',{willReadFrequently:true}); }
     _sctx.clearRect(0,0,_sCanvas.width,_sCanvas.height); _sctx.drawImage(im,0,0);
     const c=Math.max(0,Math.min(Math.floor(fx*im.naturalWidth),im.naturalWidth-1)),
           r2=Math.max(0,Math.min(Math.floor(fy*im.naturalHeight),im.naturalHeight-1));
     const px=_sctx.getImageData(c,r2,1,1).data;
-    out.push({t:fr.t, val: px[3]===0?null:(exact ? +(px[0]/255*vmax).toFixed(2) : bandVal(v,px[0],px[1],px[2]))});
-  }
-  return out;
+    return {t:fr.t, val: px[3]===0?null:(exact ? +(px[0]/255*vmax).toFixed(2) : bandVal(v,px[0],px[1],px[2]))};
+  });
 }
-function sparkline(hist,future,v){
+function sparkline(hist,future,v,showKey){
   const W=280,H=140,pad={l:34,r:8,t:10,b:22};
   const all=[...(hist||[]),...(future||[])].map(d=>d.val).filter(x=>x!=null);
   if(!all.length) return `<div style="font:12px system-ui;color:#667">No ${VARDEF[v].units} values here (dry / outside domain).</div>`;
@@ -389,31 +446,228 @@ function sparkline(hist,future,v){
   const grid=[0,ymax/2,ymax].map(y=>`<line x1="${pad.l}" y1="${Y(y).toFixed(1)}" x2="${W-pad.r}" y2="${Y(y).toFixed(1)}" stroke="#e5e8ec"/>`
       +`<text x="${pad.l-4}" y="${(Y(y)+3).toFixed(1)}" text-anchor="end" font-size="9" fill="#889">${y.toFixed(y<10?1:0)}</text>`).join('');
   const t0=(hist&&hist[0]&&hist[0].t)||'', t1=(hist&&hist[hist.length-1]&&hist[hist.length-1].t)||'';
+  const key = showKey ? `
+  <div style="font:11px system-ui;color:#556;margin-top:3px">
+    <span style="color:#2166ac">■</span> Historical &nbsp; <span style="color:#e6791b">■</span> Future climate</div>` : '';
   return `<svg width="${W}" height="${H}" style="display:block">${grid}
     <path d="${path(hist)}" fill="none" stroke="#2166ac" stroke-width="1.8"/>
     <path d="${path(future)}" fill="none" stroke="#e6791b" stroke-width="1.8" stroke-dasharray="4 3"/>
     <text x="${pad.l}" y="${H-6}" font-size="9" fill="#889">${(t0||'').slice(5,10)}</text>
     <text x="${W-pad.r}" y="${H-6}" text-anchor="end" font-size="9" fill="#889">${(t1||'').slice(5,10)}</text>
-  </svg>
-  <div style="font:11px system-ui;color:#556;margin-top:2px">
-    <span style="color:#2166ac">■</span> Historical &nbsp; <span style="color:#e6791b">■</span> Future &nbsp;·&nbsp; ${VARDEF[v].legend}</div>`;
+  </svg>${key}`;
 }
 let clickMarker=null;
+const CLICK_VARS=[{v:'rise',label:'Water rise above normal'},
+                  {v:'depth',label:'Total water depth'},
+                  {v:'wind',label:'Wind speed'}];
 map.on('click',async e=>{
-  const v=(curVar==='diff'?'rise':(curVar==='overland'?'overland_'+omode:curVar));
-  const ref=store[`${ev}_historical`] && store[`${ev}_historical`][v]; if(!ref) return;
+  const ref=store[`${ev}_historical`] && store[`${ev}_historical`]['rise']; if(!ref) return;
   const p=L.CRS.EPSG3857.project(e.latlng), [[s,w],[n,ee]]=(ref.bounds||BOUNDS);
   const pw=L.CRS.EPSG3857.project(L.latLng(s,w)), pe=L.CRS.EPSG3857.project(L.latLng(n,ee));
   const fx=(p.x-pw.x)/(pe.x-pw.x), fy=(pe.y-p.y)/(pe.y-pw.y);
   if(fx<0||fy<0||fx>1||fy>1) return;
   if(clickMarker) map.removeLayer(clickMarker);
-  clickMarker=L.circleMarker(e.latlng,{radius:5,color:'#111',weight:2,fillColor:'#fff',fillOpacity:1}).addTo(map);
-  const name=(v.indexOf('overland')===0?'Overland flood':{depth:'Depth',rise:'Rise',wind:'Wind'}[v]);
-  const pop=L.popup({maxWidth:320,minWidth:300}).setLatLng(e.latlng)
-    .setContent(`<b>${name} time series</b><br><span style="font:11px system-ui;color:#667">${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)} — sampling…</span>`).openOn(map);
-  const [hist,future]=await Promise.all([seriesAt(ev,'historical',v,fx,fy), seriesAt(ev,'future',v,fx,fy)]);
-  pop.setContent(`<b>${name} time series</b> <span style="font:11px system-ui;color:#667">(${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)})</span><br>${sparkline(hist,future,v)}`);
+  clickMarker=L.circleMarker(e.latlng,{radius:8,color:'#111',weight:3,fillColor:'#fff',fillOpacity:1}).addTo(map);
+  const coord=`${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)}`;
+  const head=`<b style="font-size:14px">All variables at this point</b><br>
+    <span style="font:11.5px system-ui;color:#667">${EVNAME[ev]} &middot; ${coord}</span>`;
+  const pop=L.popup({maxWidth:330,minWidth:310,autoPanPadding:[24,24]}).setLatLng(e.latlng)
+    .setContent(`${head}<br><span style="font:12px system-ui;color:#667">sampling every frame&hellip;</span>`).openOn(map);
+  const res=await Promise.all(CLICK_VARS.flatMap(cv=>[seriesAt(ev,'historical',cv.v,fx,fy),
+                                                      seriesAt(ev,'future',cv.v,fx,fy)]));
+  let body='';
+  CLICK_VARS.forEach((cv,i)=>{
+    const hist=res[i*2], fut=res[i*2+1];
+    const any=[...(hist||[]),...(fut||[])].some(d=>d&&d.val!=null&&d.val>0);
+    body+=`<div style="margin-top:9px"><div style="font:600 12px system-ui;color:#111826">${cv.label}
+      <span style="font-weight:400;color:#8a94a1">(${VARDEF[cv.v].units})</span></div>`;
+    body+= any ? sparkline(hist,fut,cv.v,i===CLICK_VARS.length-1)
+               : `<div style="font:11.5px system-ui;color:#8a94a1;padding:5px 0">Stays at zero here in both scenarios.</div>`;
+    body+='</div>';
+  });
+  const prov = ev==='harvey' ? `<div style="font:11px system-ui;color:#92400e;margin-top:9px;line-height:1.4">
+      Harvey future is <b>provisional</b> &mdash; that run is being re-checked.</div>` : '';
+  pop.setContent(`${head}<div style="max-height:430px;overflow-y:auto;margin-top:2px">${body}${prov}</div>`);
 });
+
+/* ===================================================================
+   Water & wastewater infrastructure (item 2), plain-language guide
+   (item 4) and the all-variable summary charts (item 3).
+   =================================================================== */
+const EVNAME={harvey:'Harvey (2017)',rita:'Rita (2005)',ike:'Ike (2008)'};
+const FACDEF={water:{color:'#1d7fd4',label:'Water treatment plant',cb:'facWater'},
+              wastewater:{color:'#0f9d6e',label:'Wastewater treatment plant',cb:'facWaste'},
+              pump:{color:'#e07b1a',label:'Pumping station',cb:'facPump'}};
+map.createPane('facs'); map.getPane('facs').style.zIndex=520;
+const facLayers={water:L.layerGroup(),wastewater:L.layerGroup(),pump:L.layerGroup()};
+
+function facPopup(p){
+  const cell=v=>{
+    if(v==null) return '<td class="fac-dry">not modelled</td>';
+    return v>0.05 ? `<td class="fac-wet">${v.toFixed(2)} m</td>` : '<td class="fac-dry">stays dry</td>';
+  };
+  const rows=EVENTS.map(k=>{
+    const ex=p.exp||{};
+    const star=(k==='harvey')?'<span style="color:#b45309">*</span>':'';
+    return `<tr><td style="font-weight:600">${EVNAME[k].split(' ')[0]}${star}</td>${cell(ex[k+'_historical'])}${cell(ex[k+'_future'])}</tr>`;
+  }).join('');
+  const sub=[FACDEF[p.kind].label, p.city].filter(Boolean).join(' &middot; ');
+  const star = `<div class="fac-src">Peak water depth at this site across the whole storm, from the flood model.
+    ${'<span style="color:#b45309">*</span> Harvey future run is provisional.'}<br>Location: ${p.src}</div>`;
+  return `<div class="fac-pop"><b>${p.name}</b><br><span style="color:#667">${sub}</span>
+    <table class="fac-tbl"><tr><th></th><th>Historical</th><th>Future</th></tr>${rows}</table>${star}</div>`;
+}
+
+function loadFacilities(){
+  return fetch('data/facilities.geojson',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(gj=>{
+    if(!gj) return;
+    gj.features.forEach(f=>{
+      const p=f.properties, d=FACDEF[p.kind]; if(!d) return;
+      const [lon,lat]=f.geometry.coordinates;
+      L.circleMarker([lat,lon],{pane:'facs',radius:7,color:'#fff',weight:2,
+        fillColor:d.color,fillOpacity:.95})
+       .bindPopup(facPopup(p),{maxWidth:300})
+       .bindTooltip(p.name,{direction:'top',offset:[0,-8]})
+       .addTo(facLayers[p.kind]);
+    });
+    Object.keys(FACDEF).forEach(k=>{ if(el(FACDEF[k].cb).checked) facLayers[k].addTo(map); });
+  }).catch(()=>{});
+}
+Object.keys(FACDEF).forEach(k=>{
+  el(FACDEF[k].cb).onchange=e=>{ e.target.checked?facLayers[k].addTo(map):map.removeLayer(facLayers[k]); };
+});
+
+/* ---------------- summary charts ---------------- */
+let TS=null;
+function fmtT(t){ return t?String(t).slice(5,13).replace(' ','  ')+'h':''; }
+function chartSVG(hist,fut,fmt,cap){
+  const W=384,H=110,pad={l:40,r:10,t:8,b:19};
+  const all=[...(hist||[]),...(fut||[])].filter(x=>x!=null&&isFinite(x));
+  if(!all.length) return '<div style="font:12px system-ui;color:#8a94a1">No data.</div>';
+  let ymax=(Math.max(...all)||1)*1.18; if(cap!=null) ymax=Math.min(ymax,cap);
+  const n=Math.max((hist||[]).length,(fut||[]).length,2);
+  const X=i=>pad.l+(W-pad.l-pad.r)*(i/(n-1)), Y=y=>H-pad.b-(H-pad.t-pad.b)*(y/ymax);
+  const path=a=>{ if(!a) return ''; let d='',pen=false;
+    a.forEach((v,i)=>{ if(v==null||!isFinite(v)){pen=false;return;}
+      d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' '; pen=true; }); return d; };
+  const grid=[0,ymax/2,ymax].map(y=>
+    `<line x1="${pad.l}" y1="${Y(y).toFixed(1)}" x2="${W-pad.r}" y2="${Y(y).toFixed(1)}" stroke="#e8ebef"/>`+
+    `<text x="${pad.l-5}" y="${(Y(y)+3.5).toFixed(1)}" text-anchor="end" font-size="9.5" fill="#98a1ac">${fmt(y)}</text>`).join('');
+  return `<svg width="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="display:block;height:110px">${grid}
+    <path d="${path(hist)}" fill="none" stroke="#2166ac" stroke-width="2.1"/>
+    <path d="${path(fut)}"  fill="none" stroke="#e6791b" stroke-width="2.1" stroke-dasharray="5 3"/></svg>`;
+}
+function statLine(hist,fut,unit,dp,ceil){
+  const mx=a=>a&&a.length?Math.max(...a.filter(x=>x!=null)):null;
+  const h=mx(hist), f=mx(fut);
+  if(h==null||f==null) return '';
+  const at=v=>(ceil!=null&&v>=ceil-0.01)?'&ge;':'';
+  const d=f-h, sign=d>=0?'+':'';
+  const capped=(ceil!=null&&(h>=ceil-0.01||f>=ceil-0.01));
+  const col=d>0?'#b42318':(d<0?'#175cd3':'#667085');
+  return `<div class="sub">peak ${at(h)}${h.toFixed(dp)} → ${at(f)}${f.toFixed(dp)} ${unit}
+    <span style="color:${col};font-weight:700">(${sign}${d.toFixed(dp)})</span>${
+      capped?' <span style="color:#92400e">— at the '+ceil+' '+unit+' display ceiling, so the true peak is higher</span>':''}</div>`;
+}
+function buildSummary(){
+  const c=el('summary');
+  const t0=TS&&TS[ev]&&TS[ev].historical&&TS[ev].historical.rise?TS[ev].historical.rise.t:null;
+  if(!TS||!TS[ev]){ c.innerHTML='<button class="close" data-close="summary">&times;</button><h3>Summary charts</h3><p>Time-series summary is not available.</p>'; return; }
+  const H=TS[ev].historical||{}, F=TS[ev].future||{};
+  const span=t0?`${fmtT(t0[0])} &rarr; ${fmtT(t0[t0.length-1])} UTC, 6-hourly`:'';
+  const warn=TS[ev]._warn?`<p style="color:#92400e;font-size:12.5px"><b>Note:</b> ${Object.values(TS[ev]._warn)[0]} &mdash; the two lines cover slightly different lengths of time.</p>`:'';
+  const prov=ev==='harvey'?'<span class="tag">Harvey future provisional</span>':'';
+  const pct=v=>Math.round(v*100)+'%';
+  const box=(title,sub,hist,fut,stat,fmt,cap)=>`<div class="chartbox"><div class="ttl">${title}</div>
+      <div class="sub">${sub}</div>${stat}${chartSVG(hist,fut,fmt,cap)}</div>`;
+  const vmaxOf=v=>((H[v]&&H[v].vmax)!=null?H[v].vmax:((F[v]&&F[v].vmax)!=null?F[v].vmax:null));
+  c.innerHTML=`<button class="close" data-close="summary">&times;</button>
+    <h3>${EVNAME[ev]}${prov}</h3>
+    <p style="color:#6b7480;font-size:12.5px;margin-top:2px">Whole-domain totals over the storm. Solid = historical, dashed = future climate. ${span}</p>
+    ${warn}
+    ${box('Water rise above normal','highest anywhere in the domain, each timestep',
+          (H.rise||{}).peak,(F.rise||{}).peak,
+          statLine((H.rise||{}).peak,(F.rise||{}).peak,'m',2,vmaxOf('rise')),y=>y.toFixed(1))}
+    ${box('Area under water','share of the domain with water more than 10 cm above normal',
+          ((H.rise||{}).area||[]).map(v=>v*100),((F.rise||{}).area||[]).map(v=>v*100),
+          statLine(((H.rise||{}).area||[]).map(v=>v*100),((F.rise||{}).area||[]).map(v=>v*100),'%',0),
+          y=>Math.round(y)+'%',100)}
+    ${box('Wind speed','highest anywhere in the domain, each timestep',
+          (H.wind||{}).peak,(F.wind||{}).peak,
+          statLine((H.wind||{}).peak,(F.wind||{}).peak,'m/s',1,vmaxOf('wind')),y=>y.toFixed(0))}
+    ${box('Total water depth','includes the permanent Gulf and bays, so it starts high',
+          (H.depth||{}).peak,(F.depth||{}).peak,
+          statLine((H.depth||{}).peak,(F.depth||{}).peak,'m',2,vmaxOf('depth')),y=>y.toFixed(0))}
+    <div class="keyline"><span><span style="color:#2166ac">&#9473;</span> Historical</span>
+      <span><span style="color:#e6791b">&#9548;</span> Future climate</span></div>
+    <p style="font-size:11.5px;color:#98a1ac;margin-top:10px">Switch storms with the Event buttons; the charts follow.</p>`;
+}
+
+/* ---------------- plain-language guide ---------------- */
+el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
+  <h3>How to read this map</h3>
+  <p>This map replays computer simulations of three real hurricanes that hit the Sabine&ndash;Neches
+     area of southeast Texas, and shows what the same storms would do in a warmer future climate.</p>
+
+  <h5>The three choices at the top right</h5>
+  <ul>
+    <li><b>Event</b> &mdash; which storm: Harvey (2017), Rita (2005) or Ike (2008).</li>
+    <li><b>Scenario</b> &mdash; <b>Historical</b> is the storm as it happened; <b>Future</b> is the same storm
+        in a warmer climate; <b>&Delta; Fut&minus;Hist</b> is the difference between the two, so red means
+        deeper water in the future.</li>
+    <li><b>Variable</b> &mdash; what is being coloured on the map (below).</li>
+  </ul>
+
+  <h5>What each variable means</h5>
+  <ul>
+    <li><b>Depth</b> &mdash; total water depth, including the Gulf and the bays. Useful for context, but the
+        permanent water dominates it, so all three storms look similar.</li>
+    <li><b>Rise</b> &mdash; how far the water rose <i>above its normal level</i>. This is the storm surge
+        signal, and the best single layer for comparing storms.</li>
+    <li><b>Wind</b> &mdash; wind speed, drawn as moving streamlines. Zoom out to watch the whole storm
+        cross the Gulf.</li>
+    <li><b>Overland</b> &mdash; the deepest water each place on land saw during the storm.
+        <i>Flood-only</i> hides permanent water so you see just the flooding.</li>
+  </ul>
+
+  <h5>Things you can do</h5>
+  <ul>
+    <li>Press <b>&#9654;</b> to play the storm, or drag the slider to a moment in time.</li>
+    <li><b>Hover</b> anywhere to read the exact value under the cursor.</li>
+    <li><b>Click</b> anywhere to get a chart of every variable at that spot, historical vs future.</li>
+    <li><b>Click a facility dot</b> for the deepest water that reaches it in each storm.</li>
+    <li>Use <b>Summary charts</b> for whole-area totals over the storm.</li>
+  </ul>
+
+  <h5>Why the infrastructure is shown</h5>
+  <p>Crude oil and natural gas pipelines, water and wastewater treatment plants and pumping stations
+     are the systems that keep energy and water flowing. The point of the map is to see which of them
+     sit where the water goes.</p>
+
+  <h5>What this is not</h5>
+  <ul>
+    <li>It is <b>not a forecast</b> and not a flood-insurance map. It is a model of specific past storms.</li>
+    <li>Frames are 6 hours apart, so brief peaks between frames are not shown.</li>
+    <li>The future scenario re-runs the same storm under warmer conditions; it does not say how likely
+        that storm is.</li>
+    <li>The <b>Harvey future</b> run is provisional and is being re-checked.</li>
+  </ul>
+  <p style="color:#98a1ac;font-size:11.5px">Model: D-Flow FM (Deltares). Facility locations: EPA ECHO / FRS and
+     OpenStreetMap. Pipelines: HIFLD. Built by the UTA Hydromet group.</p>`;
+
+function toggleCard(id){
+  const open=!el(id).classList.contains('open');
+  ['about','summary'].forEach(k=>{ el(k).classList.remove('open');
+    el(k==='about'?'btnAbout':'btnSummary').classList.remove('on'); });
+  if(open){ if(id==='summary') buildSummary();
+    el(id).classList.add('open'); el(id==='about'?'btnAbout':'btnSummary').classList.add('on'); }
+}
+el('btnAbout').onclick=()=>toggleCard('about');
+el('btnSummary').onclick=()=>toggleCard('summary');
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-close]'); if(b) toggleCard(b.dataset.close); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ ['about','summary'].forEach(k=>{
+  el(k).classList.remove('open'); el(k==='about'?'btnAbout':'btnSummary').classList.remove('on'); }); } });
+
 
 async function loadOne(evk,sc,v){
   const r=await fetch(`${DATA_DIR}${evk}_${sc}/manifest_${v}.json`,{cache:'no-store'});
@@ -454,6 +708,8 @@ async function loadOne(evk,sc,v){
           frames:(m.frames||[]).map(fr=>({t:fr.t, url:`${DATA_DIR}${evk}_${sc}/${fr.data}`}))}; }
     }catch(e){}
   }
+  try{ TS=await (await fetch('data/timeseries.json',{cache:'no-store'})).json(); }catch(e){ TS=null; }
+  await loadFacilities();
   el('mode').textContent='LIVE';
   showFrame(0);
 })();

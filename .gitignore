@@ -2,3 +2,6 @@
 *.tif
 __pycache__/
 *.pyc
+_t_*.html
+_make_tests.py
+animation_pre_*.html
