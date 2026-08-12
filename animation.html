@@ -507,19 +507,24 @@ const FACDEF={water:{color:'#1d7fd4',label:'Water treatment plant',cb:'facWater'
               wastewater:{color:'#0f9d6e',label:'Wastewater treatment plant',cb:'facWaste'},
               pump:{color:'#e07b1a',label:'Pumping station',cb:'facPump'}};
 
-/* Conventional utility symbology, drawn inline so there is no external dependency:
-   water treatment = droplet, wastewater = circular clarifier with rake arm,
-   pump station = centrifugal pump (circle, impeller, discharge stub). These are the
-   standard P&ID / utility-map shapes rather than licensed Esri artwork; swap in the
-   lab's own ArcGIS/QGIS SVGs here if preferred. */
+/* Facility symbology.
+   - water treatment  : Temaki "water_tower"  (CC0 1.0, rapideditor/temaki)
+   - pumping station  : Temaki "powered_pump" (CC0 1.0, rapideditor/temaki)
+   - wastewater plant : circular clarifier with rake arm, drawn here — the standard
+     civil/utility symbol for a WWTP, which neither Temaki nor OSM-carto provides.
+   Temaki is the icon set behind OpenStreetMap's iD editor and is public domain, so
+   these are safe to ship. Esri's own sets (calcite-ui-icons, calcite-point-symbols)
+   are under the Esri Master License Agreement, not open source — see the note to
+   Moein; swap them in here if UTA's ArcGIS licence covers redistribution.
+   Glyph paths use a 15x15 viewBox, translated into the 20x20 badge. */
 const FACGLYPH={
-  water:'<path d="M10 4.3c2.6 3 4 4.8 4 6.5a4 4 0 0 1-8 0c0-1.7 1.4-3.5 4-6.5z" fill="#fff"/>',
+  water:'<g transform="translate(3.4 3.4) scale(0.88)" fill="#fff">'
+       +'<path d="M11 8.92L12.11 13.35C12.19 13.68 11.99 14.02 11.65 14.11C11.32 14.19 10.98 13.99 10.89 13.65L9.9 9.66C9.41 9.84 8.82 9.94 8.12 9.98C8.12 9.99 8.13 9.99 8.13 10L8.13 13.5C8.13 13.85 7.85 14.13 7.5 14.13C7.15 14.13 6.88 13.85 6.88 13.5L6.88 10C6.88 9.99 6.88 9.99 6.88 9.98C6.18 9.94 5.59 9.84 5.1 9.66L4.11 13.65C4.02 13.99 3.68 14.19 3.35 14.11C3.01 14.02 2.81 13.68 2.89 13.35L4 8.92L4 4.5L11 4.5L11 8.92ZM7.5 1L12 3L12 4L3 4L3 3L7.5 1Z"/></g>',
+  pump:'<g transform="translate(2.8 3.6) scale(0.96)" fill="#fff">'
+      +'<path d="M1 13L1 6C1 5.67 1 5.33 1 5C1 3.9 1.9 3 3 3C3.33 3 3.67 3 4 3L5 3L5 2L3.5 2C3.22 2 3 1.78 3 1.5C3 1.22 3.22 1 3.5 1L7.5 1C7.78 1 8 1.22 8 1.5C8 1.78 7.78 2 7.5 2L6 2L6 3L8 3C9.1 3 10 3.9 10 5L10 8L14.2 8.84C14.66 8.93 15 9.34 15 9.82L15 10L11.5 10C11.22 10 11 10.22 11 10.5C11 10.78 11.22 11 11.5 11L15 11L15 12L11.5 12C11.22 12 11 12.22 11 12.5C11 12.78 11.22 13 11.5 13L15 13C15 13.55 14.55 14 14 14L7 14C5.67 13.33 5 12.33 5 11C5 9.67 5.67 8.67 7 8L7 6C5.69 6 4 6 4 6L4 13L4.5 13C4.78 13 5 13.22 5 13.5C5 13.78 4.78 14 4.5 14L0.5 14C0.22 14 0 13.78 0 13.5C0 13.22 0.22 13 0.5 13L1 13Z"/></g>',
   wastewater:'<circle cx="10" cy="10" r="5.4" fill="none" stroke="#fff" stroke-width="1.6"/>'
              +'<path d="M10 10V4.6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'
-             +'<circle cx="10" cy="10" r="1.5" fill="#fff"/>',
-  pump:'<circle cx="9.6" cy="10.8" r="4.7" fill="none" stroke="#fff" stroke-width="1.6"/>'
-       +'<path d="M9.6 6.1V3.6h4.3" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'
-       +'<path d="M7.9 8.7 12.1 10.8 7.9 12.9z" fill="#fff"/>'
+             +'<circle cx="10" cy="10" r="1.5" fill="#fff"/>'
 };
 function facIcon(kind){
   const d=FACDEF[kind];
@@ -722,7 +727,8 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
      results next to ours.</p>
   <p style="color:#98a1ac;font-size:11.5px">Model: Delft3D Flexible Mesh (Deltares), forced by
      WRF-derived wind and pressure fields. Facility locations: EPA ECHO / FRS and OpenStreetMap.
-     Pipelines: U.S. Energy Information Administration Energy Atlas. Built by the UTA Hydromet group.</p>`;
+     Pipelines: U.S. Energy Information Administration Energy Atlas. Facility symbols: Temaki
+     (CC0). Built by the UTA Hydromet group.</p>`;
 
 /* ---------------- standing caveat banner ----------------
    These runs are wind/pressure-only and two of the three stop before the storm
