@@ -154,6 +154,9 @@
     <label class="chk"><input type="checkbox" id="facWater" checked> <span class="dot" style="background:#1d7fd4"></span> Water treatment plants</label>
     <label class="chk"><input type="checkbox" id="facWaste" checked> <span class="dot" style="background:#0f9d6e"></span> Wastewater plants</label>
     <label class="chk"><input type="checkbox" id="facPump" checked> <span class="dot" style="background:#e07b1a"></span> Pumping stations</label>
+    <label class="chk"><input type="checkbox" id="engRefinery" checked> <span class="dot" style="background:#5b21b6"></span> Refineries</label>
+    <label class="chk"><input type="checkbox" id="engPolpump" checked> <span class="dot" style="background:#a16207"></span> Petroleum pump stations</label>
+    <label class="chk"><input type="checkbox" id="engOrphanwell"> <span class="dot" style="background:#78716c"></span> Orphan wells</label>
     <div style="font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.45">Click any site for its peak flood depth in every storm.</div>
   </div>
   <div class="grp">
@@ -383,7 +386,8 @@ function seg(id,attr,setter){ el(id).addEventListener('click',e=>{ const b=e.tar
   [...el(id).children].forEach(x=>x.classList.remove('active')); b.classList.add('active'); setter(b.dataset[attr]);
   drawLegend(); showFrame(0); }); }
 function updModeVis(){ el('modegrp').style.display=(curVar==='overland'&&scen!=='diff')?'block':'none'; }
-seg('eventseg','ev',v=>{ ev=v; updateBanner(); if(el('summary').classList.contains('open')) buildSummary(); });
+seg('eventseg','ev',v=>{ ev=v; applyHarveyGate(); updateBanner();
+  if(el('summary').classList.contains('open')) buildSummary(); });
 seg('scenseg','scen',v=>{ scen=v; const d=(v==='diff');
   el('varseg').style.opacity=d?0.4:1; el('varseg').style.pointerEvents=d?'none':'auto'; updModeVis(); });
 seg('varseg','var',v=>{ curVar=v; updModeVis(); });
@@ -604,6 +608,44 @@ Object.keys(FACDEF).forEach(k=>{
   el(FACDEF[k].cb).onchange=e=>{ e.target.checked?facLayers[k].addTo(map):map.removeLayer(facLayers[k]); };
 });
 
+/* ---------------- energy infrastructure ----------------
+   Requested in the project's own Energy-infrastructure-maps.docx. Oil wells are
+   deliberately NOT the raw layer: the Texas RRC lists 8,727 wells inside this
+   domain, which would bury the map. The 63 ORPHAN wells — unplugged, no active
+   operator — are the flood-relevant subset, and are off by default. */
+const ENGDEF={
+  refinery: {color:'#5b21b6',label:'Refinery',        cb:'engRefinery',  r:8},
+  polpump:  {color:'#a16207',label:'Petroleum pump station', cb:'engPolpump', r:6},
+  orphanwell:{color:'#78716c',label:'Orphan well',    cb:'engOrphanwell',r:4}
+};
+const engLayers={refinery:L.layerGroup(),polpump:L.layerGroup(),orphanwell:L.layerGroup()};
+function engPopup(p){
+  const d=ENGDEF[p.kind];
+  const sub=[d.label,p.city].filter(Boolean).join(' &middot; ');
+  return `<div class="fac-pop"><b>${p.name}</b><br><span style="color:#667">${sub}</span>
+    ${p.note?`<div style="margin-top:6px;font-size:12.5px;color:#39424f">${p.note}</div>`:''}
+    <div class="fac-src">Flood depths at this point: click the map here with a water layer
+      shown, or read the nearest water-facility pop-up.<br>Source: ${p.src}</div></div>`;
+}
+function loadEnergy(){
+  return fetch('data/energy.geojson',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(gj=>{
+    if(!gj) return;
+    gj.features.forEach(f=>{
+      const p=f.properties, d=ENGDEF[p.kind]; if(!d) return;
+      const [lon,lat]=f.geometry.coordinates;
+      L.circleMarker([lat,lon],{pane:'facs',radius:d.r,color:'#fff',weight:1.6,
+        fillColor:d.color,fillOpacity:.95})
+       .bindPopup(engPopup(p),{maxWidth:320})
+       .bindTooltip(p.name,{direction:'top',offset:[0,-6]})
+       .addTo(engLayers[p.kind]);
+    });
+    Object.keys(ENGDEF).forEach(k=>{ if(el(ENGDEF[k].cb).checked) engLayers[k].addTo(map); });
+  }).catch(()=>{});
+}
+Object.keys(ENGDEF).forEach(k=>{
+  el(ENGDEF[k].cb).onchange=e=>{ e.target.checked?engLayers[k].addTo(map):map.removeLayer(engLayers[k]); };
+});
+
 /* ---------------- summary charts ---------------- */
 let TS=null;
 function fmtT(t){ return t?String(t).slice(5,13).replace(' ','  ')+'h':''; }
@@ -728,8 +770,12 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
         pop-ups, not in the animation. The difference is large: under Ike, facilities that the
         stopped run showed bone dry reach 2.5 m.</li>
     <li>The <b>Harvey</b> run covers the right week and was never truncated, but without
-        rainfall it misses the flooding that actually happened. The <b>Harvey future</b> run
-        is provisional.</li>
+        rainfall it misses the flooding that actually happened.</li>
+    <li><b>Harvey's Future and &Delta; options are switched off.</b> Those frames came from an
+        incomplete 2025 run rather than a finished simulation — 26 frames against the
+        historical run's 29, and peak wind <i>lower</i> in the warmer scenario than in the
+        historical one. They will come back when the run is repeated. Rita and Ike future
+        are unaffected.</li>
     <li>It is <b>not a forecast</b> and not a flood-insurance map.</li>
     <li>Frames are 6 hours apart, so brief peaks between frames are not shown.</li>
     <li>The future scenario re-runs the same storm with storm parameters adjusted for a
@@ -752,6 +798,31 @@ const EV_CAVEAT={
   rita:  "The animated Rita layers still stop <b>~8 h before landfall</b>; facility depths use a re-run that goes through it.",
   ike:   "The animated Ike layers still stop <b>~31 h before landfall</b>; facility depths use a re-run that goes through it."
 };
+/* ---------------- Harvey-future gate ----------------
+   The published Harvey-future frames come from a stale June-2025 file, not from a
+   completed run: 26 frames against historical's 29, and peak wind LOWER in the
+   warm-climate run than in the historical one. Until it is re-run, Harvey's Future
+   and Delta options are disabled rather than shown with a caveat — a caveat does
+   not undo a picture. Reversible: delete this function and its two call sites. */
+const HARVEY_GATE_MSG='Harvey future is withdrawn — those frames came from an incomplete 2025 run, not a finished simulation. Rita and Ike future are unaffected.';
+function applyHarveyGate(){
+  const gated=(ev==='harvey');
+  ['future','diff'].forEach(s=>{
+    const b=document.querySelector(`#scenseg button[data-scen="${s}"]`); if(!b) return;
+    b.style.opacity=gated?0.32:1;
+    b.style.pointerEvents=gated?'none':'auto';
+    b.title=gated?HARVEY_GATE_MSG:(s==='diff'?'Future minus Historical peak depth':'');
+  });
+  if(gated && scen!=='historical'){
+    scen='historical';
+    [...el('scenseg').children].forEach(x=>x.classList.remove('active'));
+    const h=document.querySelector('#scenseg button[data-scen="historical"]');
+    if(h) h.classList.add('active');
+    el('varseg').style.opacity=1; el('varseg').style.pointerEvents='auto';
+    updModeVis(); drawLegend();
+  }
+}
+
 function updateBanner(){
   const b=el('banner');
   b.innerHTML=`Surge only &mdash; no rainfall, river inflow or tides. ${EV_CAVEAT[ev]||''}`
@@ -817,8 +888,10 @@ async function loadOne(evk,sc,v){
   }
   try{ TS=await (await fetch('data/timeseries.json',{cache:'no-store'})).json(); }catch(e){ TS=null; }
   await loadFacilities();
+  await loadEnergy();
   el('mode').textContent='LIVE';
   updateBanner();
+  applyHarveyGate();
   showFrame(0);
 })();
 </script>
