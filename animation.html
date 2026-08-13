@@ -542,33 +542,42 @@ map.createPane('facs'); map.getPane('facs').style.zIndex=520;
 const facLayers={water:L.layerGroup(),wastewater:L.layerGroup(),pump:L.layerGroup()};
 
 function facPopup(p){
-  const cell=v=>{
+  const ex=p.exp||{}, pb=p.pub||{}, xt=p.ext||{};
+  // primary = the TStop-extended re-run where one exists, else the original run;
+  // "was X" exposes how much the truncation was hiding.
+  const cell=k=>{
+    const e=xt[k], o=ex[k];
+    const v=(e!=null)?e:o;
     if(v==null) return '<td class="fac-dry">not modelled</td>';
-    return v>0.05 ? `<td class="fac-wet">${v.toFixed(2)} m</td>` : '<td class="fac-dry">no surge</td>';
+    const main=v>0.05 ? `<span class="fac-wet">${v.toFixed(2)} m</span>`
+                      : '<span class="fac-dry">no surge</span>';
+    const was=(e!=null&&o!=null&&Math.abs(e-o)>0.05)
+      ? `<div style="font-size:10px;color:#98a1ac;line-height:1.2">was ${o.toFixed(2)}</div>` : '';
+    return `<td>${main}${was}</td>`;
   };
   const pcell=v=>{
     if(v==null) return '<td class="fac-dry">—</td>';
     return v>0.05 ? `<td class="fac-wet">${v.toFixed(2)} m</td>` : '<td class="fac-dry">dry</td>';
   };
-  const ex=p.exp||{}, pb=p.pub||{};
   const rows=EVENTS.map(k=>{
     const star=(k==='harvey')?'<span style="color:#b45309">*</span>':'';
-    return `<tr><td style="font-weight:600">${EVNAME[k].split(' ')[0]}${star}</td>`
-      +cell(ex[k+'_historical'])+cell(ex[k+'_future'])+pcell(pb[k+'_historical'])+'</tr>';
+    const ext=(xt[k+'_historical']!=null)?'<span style="color:#175cd3" title="re-run through landfall">&#8226;</span>':'';
+    return `<tr><td style="font-weight:600">${EVNAME[k].split(' ')[0]}${star}${ext}</td>`
+      +cell(k+'_historical')+cell(k+'_future')+pcell(pb[k+'_historical'])+'</tr>';
   }).join('');
   const sub=[FACDEF[p.kind].label, p.city].filter(Boolean).join(' &middot; ');
   const anyPub=Object.keys(pb).length>0;
+  const anyExt=Object.keys(xt).length>0;
   const note=`<div class="fac-src">
-    <b>Read the last column first.</b> The first two columns come from the surge-only
-    simulations animated here, which model wind and air pressure but <b>no rainfall,
-    no river inflow and no tides</b> — and whose Ike and Rita runs stop before the storm
-    reaches land. They understate flooding on land, often to zero.
+    ${anyExt?'<span style="color:#175cd3">&#8226;</span> <b>Rita and Ike depths are from re-runs extended through landfall</b> (12 Aug 2026, awaiting review); "was" shows what the original, prematurely-stopped run reported. The <i>animated layers on this map are still the original shorter runs</i> — only these numbers are updated.<br>':''}
+    All of these columns are <b>surge only</b>: wind and air pressure, with <b>no rainfall,
+    no river inflow and no tides</b>, so they still understate flooding on land.
     ${anyPub?'The <b>published</b> column is the peer-reviewed compound-flood result for the historical storm (Maymandi, Hummel &amp; Zhang, 2022), which does include rainfall and rivers.':''}
-    <br><span style="color:#b45309">*</span> Harvey future run is provisional.
+    <br><span style="color:#b45309">*</span> Harvey was never truncated, but its future run is provisional.
     <br>Site location: ${p.src}</div>`;
   return `<div class="fac-pop"><b>${p.name}</b><br><span style="color:#667">${sub}</span>
     <table class="fac-tbl">
-      <tr><th></th><th colspan="2" style="text-align:center;border-bottom:1px solid #e5e8ec">this map — surge only</th><th style="text-align:center;border-bottom:1px solid #e5e8ec">published</th></tr>
+      <tr><th></th><th colspan="2" style="text-align:center;border-bottom:1px solid #e5e8ec">this model — surge only</th><th style="text-align:center;border-bottom:1px solid #e5e8ec">published</th></tr>
       <tr><th></th><th>hist.</th><th>future</th><th>compound</th></tr>${rows}</table>${note}</div>`;
 }
 
@@ -710,12 +719,17 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
      came mainly from rain — Harvey above all — this map cannot show it, and will look far
      too dry on land.</p>
   <ul>
-    <li>The <b>Ike</b> run ends 8 Sep–12 Sep 2008, about <b>31 hours before Ike actually
-        made landfall</b> (13 Sep, 07:00 UTC). The storm never arrives inside the simulation.</li>
-    <li>The <b>Rita</b> run ends 23 Sep 2005, about <b>8 hours before landfall</b>
-        (24 Sep, 07:40 UTC), so it misses the peak surge.</li>
-    <li>The <b>Harvey</b> run covers the right week, but without rainfall it misses the
-        flooding that actually happened. The <b>Harvey future</b> run is provisional.</li>
+    <li>The animated <b>Ike</b> layers end 12 Sep 2008, about <b>31 hours before Ike actually
+        made landfall</b> (13 Sep, 07:00 UTC) — the storm never arrives inside that simulation.
+        The animated <b>Rita</b> layers end 23 Sep 2005, about <b>8 hours before landfall</b>
+        (24 Sep, 07:40 UTC).</li>
+    <li><b>Both have now been re-run through landfall</b> (12 Aug 2026) and those results are
+        awaiting review. For the moment they appear only as the facility depths in the
+        pop-ups, not in the animation. The difference is large: under Ike, facilities that the
+        stopped run showed bone dry reach 2.5 m.</li>
+    <li>The <b>Harvey</b> run covers the right week and was never truncated, but without
+        rainfall it misses the flooding that actually happened. The <b>Harvey future</b> run
+        is provisional.</li>
     <li>It is <b>not a forecast</b> and not a flood-insurance map.</li>
     <li>Frames are 6 hours apart, so brief peaks between frames are not shown.</li>
     <li>The future scenario re-runs the same storm with storm parameters adjusted for a
@@ -735,8 +749,8 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
    reaches land. That has to be on screen, not buried in a panel. */
 const EV_CAVEAT={
   harvey:"Harvey's flooding here was mostly <b>rainfall</b>, which these runs do not model.",
-  rita:  "The Rita run stops <b>~8 h before landfall</b>, so the peak surge is missing.",
-  ike:   "The Ike run stops <b>~31 h before landfall</b> &mdash; the storm never arrives."
+  rita:  "The animated Rita layers still stop <b>~8 h before landfall</b>; facility depths use a re-run that goes through it.",
+  ike:   "The animated Ike layers still stop <b>~31 h before landfall</b>; facility depths use a re-run that goes through it."
 };
 function updateBanner(){
   const b=el('banner');
