@@ -283,7 +283,10 @@ function drawRose(){
     ctx.fillStyle='rgba(52,120,180,.78)'; ctx.fill(); }
   ctx.fillStyle='#5c6c7c'; ctx.font='bold 10px -apple-system,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('N',cx,cy-R-7); ctx.fillText('S',cx,cy+R+7); ctx.fillText('E',cx+R+8,cy); ctx.fillText('W',cx-R-8,cy);
-  el('rosePeak').textContent = fr.peak ? ('peak '+fr.peak+' m/s') : '';
+  // the rose is computed over the WHOLE model mesh, including the Gulf outside the
+  // visible window, so its peak is legitimately higher than anything you can hover
+  el('rosePeak').innerHTML = fr.peak
+    ? `peak ${fr.peak} m/s<div style="font-weight:400;font-size:9.5px;color:#98a1ac;line-height:1.25;margin-top:1px">whole model area,<br>not just this view</div>` : '';
 }
 /* ---- wind particle flow field (Windy-style) ---- */
 /* The flow field lives in its own Leaflet pane rather than as a sibling of the map
@@ -429,7 +432,13 @@ map.on('mousemove',e=>{
     const dc=Math.floor((p.x-pw.x)/(pe.x-pw.x)*dcanvas.width), dr2=Math.floor((pe.y-p.y)/(pe.y-pw.y)*dcanvas.height);
     if(dc>=0&&dr2>=0&&dc<dcanvas.width&&dr2<dcanvas.height){
       const dp=dctx.getImageData(dc,dr2,1,1).data;
-      if(dp[3]>0){ const val=dSigned?(dp[0]/255*2*dVmax-dVmax):(dp[0]/255*dVmax); const sg=(dSigned&&val>0)?'+':''; el('info').innerHTML=`<b>${name}:</b> ${sg}${val.toFixed(2)} ${u}`; return; }
+      if(dp[3]>0){ const val=dSigned?(dp[0]/255*2*dVmax-dVmax):(dp[0]/255*dVmax); const sg=(dSigned&&val>0)?'+':'';
+        // byte 255 means the value is pinned at the tile's quantisation ceiling —
+        // the true value is at least this, not exactly this. Rita-future rise hits it.
+        const ge=(dp[0]>=255)?'&ge;':'';
+        el('info').innerHTML=`<b>${name}:</b> ${ge}${sg}${val.toFixed(2)} ${u}`
+          +(ge?`<div style="font-size:10.5px;color:#92400e;margin-top:2px">at the ${dVmax} ${u} display ceiling</div>`:'');
+        return; }
     }
   }
   const band=nearestBand(px[0],px[1],px[2],v);
