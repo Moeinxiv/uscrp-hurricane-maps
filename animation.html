@@ -46,12 +46,16 @@
   #ctrl label.chk .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 1px rgba(255,255,255,.9)}
   #ctrl .lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--faint);margin-bottom:8px}
   #ctrl label.op{display:flex;justify-content:space-between;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:8px}
-  #legend{position:absolute;left:16px;bottom:158px;z-index:9999;padding:14px 16px;font-size:11.5px;width:192px;max-height:46vh;overflow-y:auto}
+  /* legend + wind rose share one bottom-left column so they can never overlap,
+     whatever the legend's height: legend on top, wind rose beneath it */
+  #leftstack{position:absolute;left:16px;bottom:158px;z-index:9999;display:flex;flex-direction:column;
+    align-items:flex-start;gap:10px;max-height:calc(100vh - 250px)}
+  #legend{padding:14px 16px;font-size:11.5px;width:192px;max-height:38vh;overflow-y:auto;flex:0 1 auto}
   #legend .row{display:flex;align-items:center;margin:4px 0;color:var(--ink)}
   #legend .sw{width:12px;height:12px;border-radius:3px;margin-right:9px;border:1px solid rgba(0,0,0,.08);flex:0 0 auto}
   #legNote{margin-top:10px;font-size:10px;line-height:1.45;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
   #legNote:empty{display:none}
-  #windrose{position:absolute;left:224px;bottom:158px;z-index:9999;padding:11px 13px;width:150px;display:none}
+  #windrose{padding:11px 13px;width:150px;display:none;flex:0 0 auto}
   #windrose canvas{display:block;margin:0 auto}
   #info{position:absolute;top:62px;left:16px;z-index:9999;padding:12px 15px;font-size:12.5px;min-width:172px;max-width:262px;color:var(--ink)}
   #banner{position:absolute;top:0;left:0;right:0;z-index:10002;background:#b45309;color:#fff;
@@ -154,9 +158,9 @@
     <label class="chk"><input type="checkbox" id="facWater" checked> <span class="dot" style="background:#1d7fd4"></span> Water treatment plants</label>
     <label class="chk"><input type="checkbox" id="facWaste" checked> <span class="dot" style="background:#0f9d6e"></span> Wastewater plants</label>
     <label class="chk"><input type="checkbox" id="facPump" checked> <span class="dot" style="background:#e07b1a"></span> Pumping stations</label>
-    <label class="chk"><input type="checkbox" id="engRefinery" checked> <span class="dot" style="background:#5b21b6"></span> Refineries</label>
-    <label class="chk"><input type="checkbox" id="engPolpump" checked> <span class="dot" style="background:#a16207"></span> Petroleum pump stations</label>
-    <label class="chk"><input type="checkbox" id="engOrphanwell"> <span class="dot" style="background:#78716c"></span> Orphan wells</label>
+    <label class="chk"><input type="checkbox" id="engRefinery" checked> <span class="dot" style="background:#7c3aed"></span> Refineries</label>
+    <label class="chk"><input type="checkbox" id="engPolpump" checked> <span class="dot" style="background:#b91c1c"></span> Petroleum pump stations</label>
+    <label class="chk"><input type="checkbox" id="engOrphanwell"> <span class="dot" style="background:#57534e"></span> Orphan wells</label>
     <div style="font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.45">Click any site for its peak flood depth in every storm.</div>
   </div>
   <div class="grp">
@@ -165,9 +169,10 @@
   </div>
 </div>
 
-<div id="legend" class="ui-panel"><h4 id="legTitle">Max Depth (m)</h4><div id="legRows"></div><div id="legNote"></div></div>
-
-<div id="windrose" class="ui-panel"><h4>Wind rose — from</h4><canvas id="roseCanvas" width="132" height="132"></canvas><div id="rosePeak" style="text-align:center;font-size:11px;font-weight:600;color:#34495e;margin-top:2px"></div></div>
+<div id="leftstack">
+  <div id="legend" class="ui-panel"><h4 id="legTitle">Max Depth (m)</h4><div id="legRows"></div><div id="legNote"></div></div>
+  <div id="windrose" class="ui-panel"><h4>Wind rose — from</h4><canvas id="roseCanvas" width="132" height="132"></canvas><div id="rosePeak" style="text-align:center;font-size:11px;font-weight:600;color:#34495e;margin-top:2px"></div></div>
+</div>
 
 <div id="timeline" class="ui-panel">
   <div class="row">
@@ -281,9 +286,18 @@ function drawRose(){
   el('rosePeak').textContent = fr.peak ? ('peak '+fr.peak+' m/s') : '';
 }
 /* ---- wind particle flow field (Windy-style) ---- */
+/* The flow field lives in its own Leaflet pane rather than as a sibling of the map
+   pane. As a sibling it sat above EVERYTHING inside the map pane — including popups,
+   which is why the click-through chart appeared behind the streamlines. At pane
+   z-index 450 it draws above the imagery (overlayPane 400) and below the pipelines
+   (500), facility icons (520) and popups (700). Because the pane is translated as
+   the map pans, alignFlow() re-pins the canvas to the container each frame so the
+   drawing code can keep working in container coordinates. */
+map.createPane('flow'); map.getPane('flow').style.zIndex=450;
 const flowCanvas=document.createElement('canvas');
-flowCanvas.style.cssText='position:absolute;left:0;top:0;pointer-events:none;z-index:450;display:none';
-map.getContainer().appendChild(flowCanvas);
+flowCanvas.style.cssText='position:absolute;left:0;top:0;pointer-events:none;display:none';
+map.getPane('flow').appendChild(flowCanvas);
+function alignFlow(){ L.DomUtil.setPosition(flowCanvas, map.containerPointToLayerPoint([0,0])); }
 const fctx=flowCanvas.getContext('2d');
 let flowField=null, flowMerc=null, particles=[], flowOn=false, flowRAF=null, flowView=null;
 const N_PARTICLES=3200, MAX_AGE=110, FLOW_K=62;
@@ -317,9 +331,10 @@ function spawnP(p){ const V=flowView;
   if(V){ p.x=V.x0+Math.random()*(V.x1-V.x0); p.y=V.y0+Math.random()*(V.y1-V.y0); }
   else { p.x=Math.random(); p.y=Math.random(); }
   p.age=(Math.random()*MAX_AGE)|0; }
-function resizeFlow(){ const s=map.getSize(); flowCanvas.width=s.x; flowCanvas.height=s.y; }
+function resizeFlow(){ const s=map.getSize(); flowCanvas.width=s.x; flowCanvas.height=s.y; alignFlow(); }
 function flowStep(){
   if(!flowOn||!flowField||!flowMerc) return;
+  alignFlow();
   const {xw,xe,yn,ys}=flowMerc, spanX=xe-xw, spanY=yn-ys;
   const vb=map.getBounds();
   const vsw=L.CRS.EPSG3857.project(vb.getSouthWest()), vne=L.CRS.EPSG3857.project(vb.getNorthEast());
@@ -352,7 +367,7 @@ function stopFlow(){ flowOn=false; if(flowRAF) cancelAnimationFrame(flowRAF); fl
   if(fctx) fctx.clearRect(0,0,flowCanvas.width,flowCanvas.height); flowCanvas.style.display='none'; }
 map.on('resize',()=>{ if(flowOn) resizeFlow(); });
 map.on('movestart zoomstart',()=>{ if(flowOn&&fctx) fctx.clearRect(0,0,flowCanvas.width,flowCanvas.height); });
-map.on('move zoom',()=>{ if(flowOn) resizeFlow(); });
+map.on('move zoom',()=>{ if(flowOn){ resizeFlow(); alignFlow(); } });
 function updateFlow(){
   const wv=(effVar()==='wind') ? windStore[`${ev}_${scen}`] : null;
   if(!wv||!wv.frames.length){ stopFlow(); return; }
@@ -522,6 +537,11 @@ const FACDEF={water:{color:'#1d7fd4',label:'Water treatment plant',cb:'facWater'
    Moein; swap them in here if UTA's ArcGIS licence covers redistribution.
    Glyph paths use a 15x15 viewBox, translated into the 20x20 badge. */
 const FACGLYPH={
+  // energy layers — same treatment as the water facilities so the map reads as one set
+  refinery:'<g transform="translate(3.4 3.2) scale(0.88)" fill="#fff">'
+    +'<path d="M12 13.5C12 15.5 3 15.5 3 13.5L3 2.5C3.5 4 11.5 4 12 2.5L12 13.5zM12 1.5C12 0 3 0 3 1.5C3 3.5 12 3.5 12 1.5z"/></g>',
+  orphanwell:'<g transform="translate(3.2 3.2) scale(0.9)" fill="#fff">'
+    +'<path d="M9 8.2C9 8.2 10 14 10 14C10 14 11.5 14 11.5 14C12 14 12 15 11.5 15C11.5 15 3.5 15 3.5 15C3 15 3 14 3.5 14C3.5 14 5 14 5 14C5 14 6 8.2 6 8.2C7 8.88 8 8.88 9 8.2zM8.4 12L6.6 12L6.3 14L8.7 14L8.4 12zM8 9.25C8 9.25 7 9.25 7 9.25L6.75 11L8.25 11C8.25 11 8 9.25 8 9.25zM9.75 6.63C9.73 7 9.56 7.59 9.25 7.9C9.25 7.9 13 9.38 13 9.38L13 14.63C13 15.13 14 15.13 14 14.63L14 9.75C14.75 10 15.25 8.7 14.5 8.45C14.5 8.45 9.75 6.63 9.75 6.63zM3.5 1C0 1 -1 9.5 1.25 9.5C2 9.5 3.24 5.6 3.24 5.6C3.24 5.6 5.25 6.35 5.25 6.35C5.25 5.94 5.5 5.38 5.77 5.09C5.77 5.09 3.71 4.31 3.71 4.31C3.71 4.31 4.5 1.85 4.5 1.5C4.5 1.25 4 1 3.5 1zM7.5 8C8.38 8 9 7.38 9 6.5C9 5.63 8.38 5 7.5 5C6.63 5 6 5.64 6 6.52C6 7.39 6.63 8 7.5 8z"/></g>',
   water:'<g transform="translate(3.4 3.4) scale(0.88)" fill="#fff">'
        +'<path d="M11 8.92L12.11 13.35C12.19 13.68 11.99 14.02 11.65 14.11C11.32 14.19 10.98 13.99 10.89 13.65L9.9 9.66C9.41 9.84 8.82 9.94 8.12 9.98C8.12 9.99 8.13 9.99 8.13 10L8.13 13.5C8.13 13.85 7.85 14.13 7.5 14.13C7.15 14.13 6.88 13.85 6.88 13.5L6.88 10C6.88 9.99 6.88 9.99 6.88 9.98C6.18 9.94 5.59 9.84 5.1 9.66L4.11 13.65C4.02 13.99 3.68 14.19 3.35 14.11C3.01 14.02 2.81 13.68 2.89 13.35L4 8.92L4 4.5L11 4.5L11 8.92ZM7.5 1L12 3L12 4L3 4L3 3L7.5 1Z"/></g>',
   pump:'<g transform="translate(2.8 3.6) scale(0.96)" fill="#fff">'
@@ -530,16 +550,16 @@ const FACGLYPH={
              +'<path d="M10 10V4.6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'
              +'<circle cx="10" cy="10" r="1.5" fill="#fff"/>'
 };
-function facIcon(kind){
-  const d=FACDEF[kind];
-  return L.divIcon({className:'fac-icon',iconSize:[20,20],iconAnchor:[10,10],popupAnchor:[0,-11],
-    html:`<svg width="20" height="20" viewBox="0 0 20 20">
-      <rect x="1" y="1" width="18" height="18" rx="5" fill="${d.color}" stroke="#fff" stroke-width="1.6"/>
+function facIcon(kind,color,size){
+  const s=size||20, k=s/20;
+  return L.divIcon({className:'fac-icon',iconSize:[s,s],iconAnchor:[s/2,s/2],popupAnchor:[0,-s/2-1],
+    html:`<svg width="${s}" height="${s}" viewBox="0 0 20 20">
+      <rect x="1" y="1" width="18" height="18" rx="5" fill="${color}" stroke="#fff" stroke-width="${(1.6/k).toFixed(2)}"/>
       ${FACGLYPH[kind]}</svg>`});
 }
-function facSwatch(kind){
+function facSwatch(kind,color){
   return `<svg width="15" height="15" viewBox="0 0 20 20" style="flex:0 0 auto">
-    <rect x="1" y="1" width="18" height="18" rx="5" fill="${FACDEF[kind].color}"/>
+    <rect x="1" y="1" width="18" height="18" rx="5" fill="${color}"/>
     ${FACGLYPH[kind]}</svg>`;
 }
 map.createPane('facs'); map.getPane('facs').style.zIndex=520;
@@ -591,7 +611,7 @@ function loadFacilities(){
     gj.features.forEach(f=>{
       const p=f.properties, d=FACDEF[p.kind]; if(!d) return;
       const [lon,lat]=f.geometry.coordinates;
-      L.marker([lat,lon],{pane:'facs',icon:facIcon(p.kind),riseOnHover:true})
+      L.marker([lat,lon],{pane:'facs',icon:facIcon(p.kind,d.color),riseOnHover:true})
        .bindPopup(facPopup(p),{maxWidth:380,minWidth:340})
        .bindTooltip(p.name,{direction:'top',offset:[0,-12]})
        .addTo(facLayers[p.kind]);
@@ -599,7 +619,7 @@ function loadFacilities(){
     // legend swatches in the control panel use the same glyphs as the map
     Object.keys(FACDEF).forEach(k=>{
       const dot=document.querySelector(`#${FACDEF[k].cb}`).parentNode.querySelector('.dot');
-      if(dot) dot.outerHTML=facSwatch(k);
+      if(dot) dot.outerHTML=facSwatch(k,FACDEF[k].color);
     });
     Object.keys(FACDEF).forEach(k=>{ if(el(FACDEF[k].cb).checked) facLayers[k].addTo(map); });
   }).catch(()=>{});
@@ -614,9 +634,9 @@ Object.keys(FACDEF).forEach(k=>{
    domain, which would bury the map. The 63 ORPHAN wells — unplugged, no active
    operator — are the flood-relevant subset, and are off by default. */
 const ENGDEF={
-  refinery: {color:'#5b21b6',label:'Refinery',        cb:'engRefinery',  r:8},
-  polpump:  {color:'#a16207',label:'Petroleum pump station', cb:'engPolpump', r:6},
-  orphanwell:{color:'#78716c',label:'Orphan well',    cb:'engOrphanwell',r:4}
+  refinery:  {color:'#7c3aed',label:'Refinery',                glyph:'refinery',  cb:'engRefinery',   size:22},
+  polpump:   {color:'#b91c1c',label:'Petroleum pump station',  glyph:'pump',      cb:'engPolpump',    size:19},
+  orphanwell:{color:'#57534e',label:'Orphan well',             glyph:'orphanwell',cb:'engOrphanwell', size:16}
 };
 const engLayers={refinery:L.layerGroup(),polpump:L.layerGroup(),orphanwell:L.layerGroup()};
 function engPopup(p){
@@ -633,11 +653,14 @@ function loadEnergy(){
     gj.features.forEach(f=>{
       const p=f.properties, d=ENGDEF[p.kind]; if(!d) return;
       const [lon,lat]=f.geometry.coordinates;
-      L.circleMarker([lat,lon],{pane:'facs',radius:d.r,color:'#fff',weight:1.6,
-        fillColor:d.color,fillOpacity:.95})
+      L.marker([lat,lon],{pane:'facs',icon:facIcon(d.glyph,d.color,d.size),riseOnHover:true})
        .bindPopup(engPopup(p),{maxWidth:320})
-       .bindTooltip(p.name,{direction:'top',offset:[0,-6]})
+       .bindTooltip(p.name,{direction:'top',offset:[0,-d.size/2-2]})
        .addTo(engLayers[p.kind]);
+    });
+    Object.keys(ENGDEF).forEach(k=>{
+      const dot=document.querySelector(`#${ENGDEF[k].cb}`).parentNode.querySelector('.dot');
+      if(dot) dot.outerHTML=facSwatch(ENGDEF[k].glyph,ENGDEF[k].color);
     });
     Object.keys(ENGDEF).forEach(k=>{ if(el(ENGDEF[k].cb).checked) engLayers[k].addTo(map); });
   }).catch(()=>{});
