@@ -1,6 +1,6 @@
 {
  "variable": "rise",
- "vmax": 3.0,
+ "vmax": 6.0,
  "units": "m",
  "bounds": [
   [
