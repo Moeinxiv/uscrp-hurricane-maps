@@ -161,7 +161,6 @@
     <label class="chk"><input type="checkbox" id="engRefinery" checked> <span class="dot" style="background:#7c3aed"></span> Refineries</label>
     <label class="chk"><input type="checkbox" id="engPolpump" checked> <span class="dot" style="background:#b91c1c"></span> Petroleum pump stations</label>
     <label class="chk"><input type="checkbox" id="engOrphanwell"> <span class="dot" style="background:#57534e"></span> Orphan wells</label>
-    <label class="chk"><input type="checkbox" id="pubPoints" checked> <span class="dot" style="background:#0f766e"></span> Gauges &amp; published analysis</label>
     <div style="font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.45">Click any site for its peak flood depth in every storm.</div>
   </div>
   <div class="grp">
@@ -681,89 +680,6 @@ Object.keys(ENGDEF).forEach(k=>{
   el(ENGDEF[k].cb).onchange=e=>{ e.target.checked?engLayers[k].addTo(map):map.removeLayer(engLayers[k]); };
 });
 
-/* ---------------- gauges and published analysis points ----------------
-   These five markers are NOT outputs of this map. They are where the published
-   compound-flood model (Maymandi, Hummel & Zhang 2022; Maymandi 2023) was checked
-   against observations, and the two LNVA sites where that study decomposed which
-   forcing actually drove the flooding. They exist to answer two questions this map
-   otherwise cannot: "has any of this been validated?" and "what floods this site?".
-   Coordinates are surveyed, not taken from our facility list -- the Neches River
-   Saltwater Barrier (USGS 08041780) sits ~8 km from the EPA-listed LNVA office,
-   and attaching the published numbers to the wrong dot would have been worse than
-   not showing them. */
-const pubLayer=L.layerGroup();
-const PUBSTAT={  // Maymandi 2023 Table 2.2 -- RMSE (m), AVERAGED over all three gauges
-  harvey:{compound:0.09,coastal:0.30},
-  ike:   {compound:0.15,coastal:0.14},
-  rita:  {compound:0.10,coastal:0.10}
-};
-function pubIcon(kind){
-  const teal='#0f766e', s=kind==='gauge'?17:19;
-  const inner = kind==='gauge'
-    ? '<path d="M10 5.6v8.8M6.6 8.2h6.8M6.6 11.4h6.8" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>'
-    : '<circle cx="10" cy="10" r="3.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="10" cy="10" r="1.1" fill="#fff"/>';
-  return L.divIcon({className:'fac-icon',iconSize:[s,s],iconAnchor:[s/2,s/2],popupAnchor:[0,-s/2-1],
-    html:`<svg width="${s}" height="${s}" viewBox="0 0 20 20">
-      <rect x="1.5" y="1.5" width="17" height="17" rx="8.5" fill="${teal}" stroke="#fff" stroke-width="1.8"/>
-      ${inner}</svg>`});
-}
-function pubPopup(p){
-  if(p.kind==='gauge'){
-    const rows=EVENTS.map(k=>{
-      const s=PUBSTAT[k], better=s.compound<=s.coastal;
-      return `<tr><td style="font-weight:600">${EVNAME[k].split(' ')[0]}</td>
-        <td style="text-align:right${better?';color:#0f766e;font-weight:600':''}">${s.compound.toFixed(2)}</td>
-        <td style="text-align:right">${s.coastal.toFixed(2)}</td></tr>`;
-    }).join('');
-    return `<div class="fac-pop"><b>${p.name}</b><br>
-      <span style="color:#667">NOAA tide gauge ${p.noaa}</span>
-      <div style="margin-top:7px;font-size:12.5px;color:#39424f">One of the three gauges used to
-        check the <b>published</b> compound-flood model for these same three storms.</div>
-      <table class="fac-tbl" style="margin-top:6px">
-        <tr><th></th><th style="text-align:right">compound</th><th style="text-align:right">surge only</th></tr>
-        ${rows}</table>
-      <div class="fac-src">Average error against observed water level, in metres — lower is better.
-        <b>These are averaged across all three gauges, not this one alone.</b> Note that adding
-        rivers and rainfall helps decisively only for Harvey; for Ike and Rita a surge-only model
-        does just as well. Source: Maymandi (2023), Table 2.2.<br>
-        Station: <a href="https://tidesandcurrents.noaa.gov/stationhome.html?id=${p.noaa}"
-        target="_blank" rel="noopener">NOAA CO-OPS ${p.noaa}</a></div></div>`;
-  }
-  const rows=EVENTS.map(k=>{
-    const d=p.drivers[k]; if(!d) return '';
-    const hi=Math.max(d.coastal,d.fluvial,d.pluvial);
-    const c=v=>`<td style="text-align:right${v===hi?';font-weight:700;color:#b42318':''}">${v}%</td>`;
-    return `<tr><td style="font-weight:600">${EVNAME[k].split(' ')[0]}</td>
-      <td style="font-size:11px;color:#667">${d.t}</td>${c(d.coastal)}${c(d.fluvial)}${c(d.pluvial)}</tr>`;
-  }).join('');
-  return `<div class="fac-pop"><b>${p.name}</b><br>
-    <span style="color:#667">${p.operator||''}</span>
-    <div style="margin-top:7px;font-size:12.5px;color:#39424f">What actually drove the flooding
-      here, from the <b>published</b> compound model — not from this map's runs.</div>
-    <table class="fac-tbl" style="margin-top:6px">
-      <tr><th></th><th style="font-size:11px">peak</th><th style="text-align:right">surge</th>
-          <th style="text-align:right">river</th><th style="text-align:right">rain</th></tr>
-      ${rows}</table>
-    <div class="fac-src">Share of the peak water level contributed by each driver, and when that
-      peak occurred. <b>Harvey at the Saltwater Barrier is 97% river water, days after the surge —
-      which is exactly what this map cannot show.</b> Ike and Rita peak at the surge instead.
-      Source: Maymandi (2023), Table 2.3. Location: ${p.src}.</div></div>`;
-}
-function loadPublished(){
-  return fetch('data/published_points.geojson',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(gj=>{
-    if(!gj) return;
-    gj.features.forEach(f=>{
-      const p=f.properties, [lon,lat]=f.geometry.coordinates;
-      L.marker([lat,lon],{pane:'facs',icon:pubIcon(p.kind),riseOnHover:true})
-       .bindPopup(pubPopup(p),{maxWidth:360,minWidth:300})
-       .bindTooltip(p.kind==='gauge'?`${p.name} — NOAA gauge`:p.name,
-                    {direction:'top',offset:[0,-12]})
-       .addTo(pubLayer);
-    });
-    if(el('pubPoints').checked) pubLayer.addTo(map);
-  }).catch(()=>{});
-}
-el('pubPoints').onchange=e=>{ e.target.checked?pubLayer.addTo(map):map.removeLayer(pubLayer); };
 
 /* ---------------- summary charts ---------------- */
 let TS=null;
@@ -893,79 +809,32 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
      came mainly from rain — Harvey above all — this map cannot show it, and will look far
      too dry on land.</p>
   <ul>
-    <li><b>All times on this map were corrected on 19 August 2026.</b> The weather files driving
-        these simulations carried timestamps <b>17 hours early</b> — the conversion script wrote a
-        US-Central reference time but labelled it UTC (&minus;5 h) and used a hard-coded start date
-        12 h before the weather data actually begins. The wind, pressure and water values are
-        unaffected; only the clock was wrong, and every time shown here has been moved forward
-        by 17 h to real UTC. Times quoted in anything written before that date are 17 h early.</li>
-    <li>The animated <b>Ike</b> layers end 12 Sep 2008 13:00 UTC and the simulation itself stops at
-        17:00, about <b>14 hours before Ike made landfall</b> (13 Sep, 07:00 UTC) — the storm never
-        arrives inside that simulation. The animated <b>Rita</b> layers run to 24 Sep 2005 11:00 UTC
-        and that simulation stops at 16:56, so Rita's run <i>does</i> cover its landfall
-        (24 Sep, 07:40 UTC).</li>
-    <li><b>Both have since been re-run to the end of their weather forcing</b> (12 Aug 2026) and
-        those results are awaiting review. For the moment they appear only as the facility depths in
-        the pop-ups, not in the animation. Extending mattered enormously for Ike — facilities the
-        stopped run showed bone dry reach 2.5 m — and barely at all for Rita, which had already
-        passed landfall.</li>
-    <li><b>For Harvey, the bigger gap is at the other end.</b> Harvey's water here peaked in the
-        rivers and in Sabine Lake on <b>4 September</b> — days after the surge had passed — and at
-        the Neches River Saltwater Barrier that peak was <b>97% river water</b>. Our Harvey window
-        closes on 30 August, so this map misses Harvey's flood peak entirely, and being surge-only
-        it could not have reproduced it in any case.</li>
-    <li><b>Ike and Rita are not the same story.</b> Published modelling of these same three storms
-        finds that Ike's and Rita's flooding was driven by <i>storm surge</i>, with the river
-        contributing little — no more than 10% for Rita. So the late river crest that dominates
-        Harvey does not dominate them. Rita's simulation does reach its flood peak; Ike's stops
-        about 14 hours short of the surge that caused its.</li>
-    <li>The <b>Harvey</b> run was never truncated — it covers the week it was set up to cover.
-        Its problem is the missing rainfall and river water, not a short window.</li>
-    <li><b>Harvey, future climate: more land floods, and it floods deeper.</b> 9% of the land
-        here goes under water instead of 5%, and the deepest water on land rises from 0.56 m
-        to 0.71 m. Almost nowhere gets drier. That is the result to take from the &Delta; layer.</li>
-    <li>Harvey's future run <b>ends 17 hours earlier</b> than its historical one — 30 Aug 00:00
-        rather than 30 Aug 17:00 — because the weather data driving it stops there. The &Delta;
-        layer compares only the period both runs cover, so the two sides are measured over the
-        same hours.</li>
-    <li>On <b>wind</b>: the warmer-climate storm is the stronger one across the full model
-        domain, which reaches far out into the Gulf. But its track shifts, so inside the small
-        area mapped here the peak can come out <i>lower</i> — 26.2 to 24.3 m/s for Harvey, 55.1
-        to 52.0 m/s for Rita. That is a peak at one point in one deterministic run, not a
-        climate signal: do not read it as a calmer storm, in either direction.</li>
-    <li>It is <b>not a forecast</b> and not a flood-insurance map.</li>
-    <li>The <b>animation</b> steps 6 hours at a time, so brief peaks between frames are not
-        drawn on the map. The <b>summary charts do not</b> — since 19 August 2026 they are
-        computed from every hour the model produced, so the peak they report is the model's
-        real peak. Expect the charts to show a higher peak than you can find by dragging the
-        slider; that is the 6-hourly animation missing it, not the chart overstating it.</li>
-    <li>The future scenario re-runs the same storm with storm parameters adjusted for a
-        warmer climate; it does not say how likely that storm is.</li>
+    <li><b>Harvey misses the flood that mattered.</b> Harvey's water here peaked in the rivers and
+        Sabine Lake on <b>4 September</b>, days after the surge, and at the Neches saltwater barrier
+        that peak was <b>97% river water</b>. This run ends 30 August and has no rivers in it.</li>
+    <li><b>Ike stops about 14 hours before landfall</b> (13 Sep 2008, 07:00 UTC), so the storm never
+        arrives inside the animation. <b>Rita does reach its peak</b> — its flooding was surge-driven
+        and the run covers it. Both have since been re-run further; those results appear only in the
+        facility pop-ups so far, and under Ike they take sites from dry to 2.5 m.</li>
+    <li><b>Harvey, future climate: more land floods, and deeper</b> — 9% of the land instead of 5%,
+        and the deepest water on land rises from 0.56 m to 0.71 m. That is the result to take from
+        the &Delta; layer. Harvey's future run ends 17 h earlier than its historical one, and the
+        &Delta; layer compares only the hours both cover.</li>
+    <li>On <b>wind</b>, do not read the mapped-area peak as a climate signal. The warmer storm is
+        stronger across the full domain, but its track shifts, so inside this small window the peak
+        can come out <i>lower</i> — Harvey 26.2 to 24.3 m/s, Rita 55.1 to 52.0.</li>
+    <li>The <b>animation</b> steps 6 hours and can miss brief peaks; the <b>summary charts</b> use
+        every model hour, so expect them to show a higher peak than the slider can find.</li>
+    <li>All times were corrected on <b>19 August 2026</b> — the driving weather files were stamped
+        17 hours early. The values are unaffected, but anything written before that date quotes
+        times 17 h early.</li>
+    <li>It is <b>not a forecast</b> and not a flood-insurance map, and the future scenario does not
+        say how likely that storm is.</li>
   </ul>
-  <h5>Where this comes from</h5>
-  <p>For what these storms did in reality — including the rainfall and river water this map leaves
-     out — the compound-flood modelling for this same estuary is published and freely readable.
-     Facility pop-ups show its results next to ours.</p>
-  <ul style="font-size:12.5px">
-    <li>Maymandi, Hummel &amp; Zhang (2022), <b>Compound coastal, fluvial, and pluvial flooding
-        during historical hurricane events in the Sabine–Neches Estuary, Texas</b>.
-        <i>Water Resources Research</i> 58(12), e2022WR033144.
-        <a href="https://doi.org/10.1029/2022WR033144" target="_blank" rel="noopener">doi</a> ·
-        <a href="https://repository.library.noaa.gov/view/noaa/48940" target="_blank" rel="noopener">free full text</a> ·
-        <a href="https://doi.org/10.5281/zenodo.7213729" target="_blank" rel="noopener">model data</a></li>
-    <li>Maymandi (2023), <b>Compound Flood Modeling of Tropical Cyclone Events in Coastal Bays and
-        Estuaries</b>. PhD dissertation, UT Arlington — the fullest account, including the future-climate
-        scenarios.
-        <a href="https://mavmatrix.uta.edu/civilengineering_dissertations/494" target="_blank" rel="noopener">open access</a></li>
-    <li>Maymandi &amp; Hummel (2024), <b>Effect of Sea-Level Rise on Hurricane-Induced Compound
-        Flooding and Economic Damages</b>. World Environmental &amp; Water Resources Congress, 71–78.
-        <a href="https://doi.org/10.1061/9780784485477.006" target="_blank" rel="noopener">doi</a></li>
-    <li>Choi, Zhang, Qian &amp; Hummel (2024), <b>Reassessing the Economic Impacts of Hurricane Harvey
-        on Texas</b>. <i>Natural Hazards</i> (in review).</li>
-  </ul>
-  <p style="font-size:12.5px">This work is part of a NOAA-funded project (Climate Program Office,
-     grant NA19OAR4310347) with the Lower Neches Valley Authority, the City of Beaumont, Jefferson
-     and Orange Counties, the Texas Water Development Board and Texas Sea Grant.</p>
+  <p>For what these storms did in reality, including rainfall and river flooding, see
+     Maymandi, Hummel &amp; Zhang (2022), <i>Water Resources Research</i> 58(12) —
+     the compound-flood modelling for this same estuary. Facility pop-ups show its
+     results next to ours.</p>
   <p style="color:#98a1ac;font-size:11.5px">Model: Delft3D Flexible Mesh (Deltares), forced by
      WRF-derived wind and pressure fields. Facility locations: EPA ECHO / FRS and OpenStreetMap.
      Pipelines: U.S. Energy Information Administration Energy Atlas. Facility symbols: Temaki
@@ -1076,7 +945,6 @@ async function loadOne(evk,sc,v){
   try{ TS=await (await fetch('data/timeseries.json',{cache:'no-store'})).json(); }catch(e){ TS=null; }
   await loadFacilities();
   await loadEnergy();
-  await loadPublished();
   el('mode').textContent='LIVE';
   updateBanner();
   setScenTitles();
