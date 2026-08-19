@@ -283,10 +283,11 @@ function drawRose(){
     ctx.fillStyle='rgba(52,120,180,.78)'; ctx.fill(); }
   ctx.fillStyle='#5c6c7c'; ctx.font='bold 10px -apple-system,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('N',cx,cy-R-7); ctx.fillText('S',cx,cy+R+7); ctx.fillText('E',cx+R+8,cy); ctx.fillText('W',cx-R-8,cy);
-  // the rose is computed over the WHOLE model mesh, including the Gulf outside the
-  // visible window, so its peak is legitimately higher than anything you can hover
+  // wind_rose.py computes this over a box roughly matching the mapped area
+  // (lon -96..-93, lat 28.6..30.6), sampled every 6 h -- NOT the whole mesh, which
+  // reaches far into the Gulf and peaks a good deal higher. Label it honestly.
   el('rosePeak').innerHTML = fr.peak
-    ? `peak ${fr.peak} m/s<div style="font-weight:400;font-size:9.5px;color:#98a1ac;line-height:1.25;margin-top:1px">whole model area,<br>not just this view</div>` : '';
+    ? `peak ${fr.peak} m/s<div style="font-weight:400;font-size:9.5px;color:#98a1ac;line-height:1.25;margin-top:1px">mapped area only,<br>6-hourly samples</div>` : '';
 }
 /* ---- wind particle flow field (Windy-style) ---- */
 /* The flow field lives in its own Leaflet pane rather than as a sibling of the map
@@ -404,7 +405,7 @@ function seg(id,attr,setter){ el(id).addEventListener('click',e=>{ const b=e.tar
   [...el(id).children].forEach(x=>x.classList.remove('active')); b.classList.add('active'); setter(b.dataset[attr]);
   drawLegend(); showFrame(0); }); }
 function updModeVis(){ el('modegrp').style.display=(curVar==='overland'&&scen!=='diff')?'block':'none'; }
-seg('eventseg','ev',v=>{ ev=v; applyHarveyGate(); updateBanner();
+seg('eventseg','ev',v=>{ ev=v; setScenTitles(); updateBanner();
   if(el('summary').classList.contains('open')) buildSummary(); });
 seg('scenseg','scen',v=>{ scen=v; const d=(v==='diff');
   el('varseg').style.opacity=d?0.4:1; el('varseg').style.pointerEvents=d?'none':'auto'; updModeVis(); });
@@ -522,7 +523,8 @@ map.on('click',async e=>{
     body+='</div>';
   });
   const prov = ev==='harvey' ? `<div style="font:11px system-ui;color:#92400e;margin-top:9px;line-height:1.4">
-      Harvey future is <b>provisional</b> &mdash; that run is being re-checked.</div>` : '';
+      Harvey's future run ends <b>17 h earlier</b> than its historical one (29 Aug 07:00), where the
+      weather data driving it stops.</div>` : '';
   pop.setContent(`${head}<div style="max-height:430px;overflow-y:auto;margin-top:2px">${body}${prov}</div>`);
 });
 
@@ -606,7 +608,7 @@ function facPopup(p){
     All of these columns are <b>surge only</b>: wind and air pressure, with <b>no rainfall,
     no river inflow and no tides</b>, so they still understate flooding on land.
     ${anyPub?'The <b>published</b> column is the peer-reviewed compound-flood result for the historical storm (Maymandi, Hummel &amp; Zhang, 2022), which does include rainfall and rivers.':''}
-    <br><span style="color:#b45309">*</span> Harvey was never truncated, but its future run is provisional.
+    <br><span style="color:#b45309">*</span> Harvey was never truncated; its future run ends 17 h earlier than its historical one, where the driving weather data stops.
     <br>Site location: ${p.src}</div>`;
   return `<div class="fac-pop"><b>${p.name}</b><br><span style="color:#667">${sub}</span>
     <table class="fac-tbl">
@@ -717,24 +719,24 @@ function buildSummary(){
   const H=TS[ev].historical||{}, F=TS[ev].future||{};
   const span=t0?`${fmtT(t0[0])} &rarr; ${fmtT(t0[t0.length-1])} UTC, 6-hourly`:'';
   const warn=TS[ev]._warn?`<p style="color:#92400e;font-size:12.5px"><b>Note:</b> ${Object.values(TS[ev]._warn)[0]} &mdash; the two lines cover slightly different lengths of time.</p>`:'';
-  const prov=ev==='harvey'?'<span class="tag">Harvey future provisional</span>':'';
+  const prov=ev==='harvey'?'<span class="tag">future run ends 17 h earlier</span>':'';
   const pct=v=>Math.round(v*100)+'%';
   const box=(title,sub,hist,fut,stat,fmt,cap)=>`<div class="chartbox"><div class="ttl">${title}</div>
       <div class="sub">${sub}</div>${stat}${chartSVG(hist,fut,fmt,cap)}</div>`;
   const vmaxOf=v=>((H[v]&&H[v].vmax)!=null?H[v].vmax:((F[v]&&F[v].vmax)!=null?F[v].vmax:null));
   c.innerHTML=`<button class="close" data-close="summary">&times;</button>
     <h3>${EVNAME[ev]}${prov}</h3>
-    <p style="color:#6b7480;font-size:12.5px;margin-top:2px">Whole-domain totals over the storm. Solid = historical, dashed = future climate. ${span}</p>
+    <p style="color:#6b7480;font-size:12.5px;margin-top:2px">Totals over the mapped area &mdash; not the whole model domain, which reaches far out into the Gulf. Solid = historical, dashed = future climate. ${span}</p>
     <p style="color:#92400e;font-size:12px;margin-top:4px">Surge only &mdash; no rainfall, river inflow or tides. ${(EV_CAVEAT[ev]||'').replace(/<\/?b>/g,'')}</p>
     ${warn}
-    ${box('Water rise above normal','highest anywhere in the domain, each timestep',
+    ${box('Water rise above normal','highest anywhere in the mapped area, each timestep',
           (H.rise||{}).peak,(F.rise||{}).peak,
           statLine((H.rise||{}).peak,(F.rise||{}).peak,'m',2,vmaxOf('rise')),y=>y.toFixed(1))}
-    ${box('Area under water','share of the domain with water more than 10 cm above normal',
+    ${box('Area under water','share of the mapped area with water more than 10 cm above normal',
           ((H.rise||{}).area||[]).map(v=>v*100),((F.rise||{}).area||[]).map(v=>v*100),
           statLine(((H.rise||{}).area||[]).map(v=>v*100),((F.rise||{}).area||[]).map(v=>v*100),'%',0),
           y=>Math.round(y)+'%',100)}
-    ${box('Wind speed','highest anywhere in the domain, each timestep',
+    ${box('Wind speed','highest anywhere in the mapped area, each timestep',
           (H.wind||{}).peak,(F.wind||{}).peak,
           statLine((H.wind||{}).peak,(F.wind||{}).peak,'m/s',1,vmaxOf('wind')),y=>y.toFixed(0))}
     ${box('Total water depth','includes the permanent Gulf and bays, so it starts high',
@@ -778,7 +780,7 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
     <li><b>Hover</b> anywhere to read the exact value under the cursor.</li>
     <li><b>Click</b> anywhere to get a chart of every variable at that spot, historical vs future.</li>
     <li><b>Click a facility dot</b> for the deepest water that reaches it in each storm.</li>
-    <li>Use <b>Summary charts</b> for whole-area totals over the storm.</li>
+    <li>Use <b>Summary charts</b> for totals across the mapped area over the storm.</li>
   </ul>
 
   <h5>Why the infrastructure is shown</h5>
@@ -803,11 +805,18 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
         stopped run showed bone dry reach 2.5 m.</li>
     <li>The <b>Harvey</b> run covers the right week and was never truncated, but without
         rainfall it misses the flooding that actually happened.</li>
-    <li><b>Harvey's Future and &Delta; options are switched off.</b> Those frames came from an
-        incomplete 2025 run rather than a finished simulation — 26 frames against the
-        historical run's 29, and peak wind <i>lower</i> in the warmer scenario than in the
-        historical one. They will come back when the run is repeated. Rita and Ike future
-        are unaffected.</li>
+    <li><b>Harvey, future climate: more land floods, and it floods deeper.</b> 9% of the land
+        here goes under water instead of 5%, and the deepest water on land rises from 0.56 m
+        to 0.71 m. Almost nowhere gets drier. That is the result to take from the &Delta; layer.</li>
+    <li>Harvey's future run <b>ends 17 hours earlier</b> than its historical one — 29 Aug 07:00
+        rather than 30 Aug 00:00 — because the weather data driving it stops there. The &Delta;
+        layer compares only the period both runs cover, so the two sides are measured over the
+        same hours.</li>
+    <li>On <b>wind</b>: the warmer-climate storm is the stronger one, with its peak rising from
+        36 to 42 m/s across the full model domain. But its track shifts, so inside the area
+        mapped here the peak comes out about 3% <i>lower</i> (25.4 against 26.2 m/s). One pair
+        of runs cannot resolve a difference that small — read it as no change, and do not read
+        it as a calmer storm.</li>
     <li>It is <b>not a forecast</b> and not a flood-insurance map.</li>
     <li>Frames are 6 hours apart, so brief peaks between frames are not shown.</li>
     <li>The future scenario re-runs the same storm with storm parameters adjusted for a
@@ -830,29 +839,25 @@ const EV_CAVEAT={
   rita:  "The animated Rita layers still stop <b>~8 h before landfall</b>; facility depths use a re-run that goes through it.",
   ike:   "The animated Ike layers still stop <b>~31 h before landfall</b>; facility depths use a re-run that goes through it."
 };
-/* ---------------- Harvey-future gate ----------------
-   The published Harvey-future frames come from a stale June-2025 file, not from a
-   completed run: 26 frames against historical's 29, and peak wind LOWER in the
-   warm-climate run than in the historical one. Until it is re-run, Harvey's Future
-   and Delta options are disabled rather than shown with a caveat — a caveat does
-   not undo a picture. Reversible: delete this function and its two call sites. */
-const HARVEY_GATE_MSG='Harvey future is withdrawn — those frames came from an incomplete 2025 run, not a finished simulation. Rita and Ike future are unaffected.';
-function applyHarveyGate(){
-  const gated=(ev==='harvey');
-  ['future','diff'].forEach(s=>{
-    const b=document.querySelector(`#scenseg button[data-scen="${s}"]`); if(!b) return;
-    b.style.opacity=gated?0.32:1;
-    b.style.pointerEvents=gated?'none':'auto';
-    b.title=gated?HARVEY_GATE_MSG:(s==='diff'?'Future minus Historical peak depth':'');
+/* ---------------- scenario button tooltips ----------------
+   The Harvey-future gate that used to live here was removed on 19 Aug 2026. It rested
+   on two claims that did not survive checking. First, that the published Harvey-future
+   frames came from an incomplete run — a clean re-run of that deck reproduces them to
+   1.8 mm in water depth and 5e-11 in wind, so they were always a finished simulation
+   that simply reached the end of its forcing. Second, that future peak wind was lower —
+   true only inside the mapped window, by about 3%, which one pair of deterministic runs
+   cannot resolve; across the full domain the future storm is the stronger one. Harvey's
+   genuinely shorter window is now stated in the guide rather than hidden by disabling
+   the control. */
+function setScenTitles(){
+  const t={historical:'The storm as it happened',
+           future:'The same storm under a warmer climate',
+           diff:'Future minus Historical peak depth'};
+  if(ev==='harvey') t.diff+=' — over the hours both runs cover, to 29 Aug 07:00';
+  Object.keys(t).forEach(s=>{
+    const b=document.querySelector(`#scenseg button[data-scen="${s}"]`);
+    if(b) b.title=t[s];
   });
-  if(gated && scen!=='historical'){
-    scen='historical';
-    [...el('scenseg').children].forEach(x=>x.classList.remove('active'));
-    const h=document.querySelector('#scenseg button[data-scen="historical"]');
-    if(h) h.classList.add('active');
-    el('varseg').style.opacity=1; el('varseg').style.pointerEvents='auto';
-    updModeVis(); drawLegend();
-  }
 }
 
 function updateBanner(){
@@ -923,7 +928,7 @@ async function loadOne(evk,sc,v){
   await loadEnergy();
   el('mode').textContent='LIVE';
   updateBanner();
-  applyHarveyGate();
+  setScenTitles();
   showFrame(0);
 })();
 </script>
