@@ -523,7 +523,7 @@ map.on('click',async e=>{
     body+='</div>';
   });
   const prov = ev==='harvey' ? `<div style="font:11px system-ui;color:#92400e;margin-top:9px;line-height:1.4">
-      Harvey's future run ends <b>17 h earlier</b> than its historical one (29 Aug 07:00), where the
+      Harvey's future run ends <b>17 h earlier</b> than its historical one (30 Aug 00:00), where the
       weather data driving it stops.</div>` : '';
   pop.setContent(`${head}<div style="max-height:430px;overflow-y:auto;margin-top:2px">${body}${prov}</div>`);
 });
@@ -596,7 +596,7 @@ function facPopup(p){
   };
   const rows=EVENTS.map(k=>{
     const star=(k==='harvey')?'<span style="color:#b45309">*</span>':'';
-    const ext=(xt[k+'_historical']!=null)?'<span style="color:#175cd3" title="re-run through landfall">&#8226;</span>':'';
+    const ext=(xt[k+'_historical']!=null)?'<span style="color:#175cd3" title="re-run to the end of its weather forcing">&#8226;</span>':'';
     return `<tr><td style="font-weight:600">${EVNAME[k].split(' ')[0]}${star}${ext}</td>`
       +cell(k+'_historical')+cell(k+'_future')+pcell(pb[k+'_historical'])+'</tr>';
   }).join('');
@@ -604,7 +604,7 @@ function facPopup(p){
   const anyPub=Object.keys(pb).length>0;
   const anyExt=Object.keys(xt).length>0;
   const note=`<div class="fac-src">
-    ${anyExt?'<span style="color:#175cd3">&#8226;</span> <b>Rita and Ike depths are from re-runs extended through landfall</b> (12 Aug 2026, awaiting review); "was" shows what the original, prematurely-stopped run reported. The <i>animated layers on this map are still the original shorter runs</i> — only these numbers are updated.<br>':''}
+    ${anyExt?'<span style="color:#175cd3">&#8226;</span> <b>Rita and Ike depths are from re-runs extended to the end of their weather forcing</b> (12 Aug 2026, awaiting review); "was" shows what the original, shorter run reported. Extending mattered for Ike, which had stopped ~14 h before landfall; Rita\'s original run had already passed landfall, so it barely moved. The <i>animated layers on this map are still the original shorter runs</i> — only these numbers are updated.<br>':''}
     All of these columns are <b>surge only</b>: wind and air pressure, with <b>no rainfall,
     no river inflow and no tides</b>, so they still understate flooding on land.
     ${anyPub?'The <b>published</b> column is the peer-reviewed compound-flood result for the historical storm (Maymandi, Hummel &amp; Zhang, 2022), which does include rainfall and rivers.':''}
@@ -795,21 +795,33 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
      came mainly from rain — Harvey above all — this map cannot show it, and will look far
      too dry on land.</p>
   <ul>
-    <li>The animated <b>Ike</b> layers end 12 Sep 2008, about <b>31 hours before Ike actually
-        made landfall</b> (13 Sep, 07:00 UTC) — the storm never arrives inside that simulation.
-        The animated <b>Rita</b> layers end 23 Sep 2005, about <b>8 hours before landfall</b>
+    <li><b>All times on this map were corrected on 19 August 2026.</b> The weather files driving
+        these simulations carried timestamps <b>17 hours early</b> — the conversion script wrote a
+        US-Central reference time but labelled it UTC (&minus;5 h) and used a hard-coded start date
+        12 h before the weather data actually begins. The wind, pressure and water values are
+        unaffected; only the clock was wrong, and every time shown here has been moved forward
+        by 17 h to real UTC. Times quoted in anything written before that date are 17 h early.</li>
+    <li>The animated <b>Ike</b> layers end 12 Sep 2008 13:00 UTC and the simulation itself stops at
+        17:00, about <b>14 hours before Ike made landfall</b> (13 Sep, 07:00 UTC) — the storm never
+        arrives inside that simulation. The animated <b>Rita</b> layers run to 24 Sep 2005 11:00 UTC
+        and that simulation stops at 16:56, so Rita's run <i>does</i> cover its landfall
         (24 Sep, 07:40 UTC).</li>
-    <li><b>Both have now been re-run through landfall</b> (12 Aug 2026) and those results are
-        awaiting review. For the moment they appear only as the facility depths in the
-        pop-ups, not in the animation. The difference is large: under Ike, facilities that the
-        stopped run showed bone dry reach 2.5 m.</li>
+    <li><b>Both have since been re-run to the end of their weather forcing</b> (12 Aug 2026) and
+        those results are awaiting review. For the moment they appear only as the facility depths in
+        the pop-ups, not in the animation. Extending mattered enormously for Ike — facilities the
+        stopped run showed bone dry reach 2.5 m — and barely at all for Rita, which had already
+        passed landfall.</li>
+    <li><b>The bigger gap is at the other end.</b> In this estuary the worst flooding is not the
+        surge; it is river and rainfall water arriving <i>days later</i> — around 2 Sep for Harvey,
+        15 Sep for Ike, 30 Sep for Rita. Every simulation here ends before that peak, whether or not
+        it was extended.</li>
     <li>The <b>Harvey</b> run covers the right week and was never truncated, but without
         rainfall it misses the flooding that actually happened.</li>
     <li><b>Harvey, future climate: more land floods, and it floods deeper.</b> 9% of the land
         here goes under water instead of 5%, and the deepest water on land rises from 0.56 m
         to 0.71 m. Almost nowhere gets drier. That is the result to take from the &Delta; layer.</li>
-    <li>Harvey's future run <b>ends 17 hours earlier</b> than its historical one — 29 Aug 07:00
-        rather than 30 Aug 00:00 — because the weather data driving it stops there. The &Delta;
+    <li>Harvey's future run <b>ends 17 hours earlier</b> than its historical one — 30 Aug 00:00
+        rather than 30 Aug 17:00 — because the weather data driving it stops there. The &Delta;
         layer compares only the period both runs cover, so the two sides are measured over the
         same hours.</li>
     <li>On <b>wind</b>: the warmer-climate storm is the stronger one, with its peak rising from
@@ -832,12 +844,15 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
      (CC0). Built by the UTA Hydromet group.</p>`;
 
 /* ---------------- standing caveat banner ----------------
-   These runs are wind/pressure-only and two of the three stop before the storm
-   reaches land. That has to be on screen, not buried in a panel. */
+   These runs are wind/pressure-only, Ike stops before the storm reaches land, and
+   all three end days before this estuary's real (river-driven) flood peak. That has
+   to be on screen, not buried in a panel.
+   Revised 19 Aug 2026 with the +17 h clock correction: Rita was never truncated —
+   its run passes landfall by ~9 h — so its caveat now names the real gap instead. */
 const EV_CAVEAT={
   harvey:"Harvey's flooding here was mostly <b>rainfall</b>, which these runs do not model.",
-  rita:  "The animated Rita layers still stop <b>~8 h before landfall</b>; facility depths use a re-run that goes through it.",
-  ike:   "The animated Ike layers still stop <b>~31 h before landfall</b>; facility depths use a re-run that goes through it."
+  rita:  "The Rita layers cover landfall, but end <b>days before</b> the river-driven flood peak.",
+  ike:   "The animated Ike layers still stop <b>~14 h before landfall</b>; facility depths use a re-run that goes through it."
 };
 /* ---------------- scenario button tooltips ----------------
    The Harvey-future gate that used to live here was removed on 19 Aug 2026. It rested
@@ -853,7 +868,7 @@ function setScenTitles(){
   const t={historical:'The storm as it happened',
            future:'The same storm under a warmer climate',
            diff:'Future minus Historical peak depth'};
-  if(ev==='harvey') t.diff+=' — over the hours both runs cover, to 29 Aug 07:00';
+  if(ev==='harvey') t.diff+=' — over the hours both runs cover, to 30 Aug 00:00';
   Object.keys(t).forEach(s=>{
     const b=document.querySelector(`#scenseg button[data-scen="${s}"]`);
     if(b) b.title=t[s];
