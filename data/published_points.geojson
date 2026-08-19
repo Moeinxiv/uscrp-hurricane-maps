@@ -1,0 +1,26 @@
+{
+"type": "FeatureCollection",
+"_note": "Points where the PUBLISHED compound-flood model was validated or analysed. Not outputs of this map's runs. Gauge coordinates from the NOAA CO-OPS metadata API; Neches River Saltwater Barrier from USGS site 08041780; North Regional Treatment Plant from EPA ECHO/FRS. Validation statistics: Maymandi (2023) Table 2.2 (averaged across the three gauges). Driver contributions and compound peak times: Table 2.3.",
+"features": [
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-93.8701,29.7284]},
+ "properties":{"kind":"gauge","name":"Sabine Pass North","noaa":"8770570","src":"NOAA CO-OPS"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-93.93,29.8667]},
+ "properties":{"kind":"gauge","name":"Port Arthur","noaa":"8770475","src":"NOAA CO-OPS"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-93.8817,29.98]},
+ "properties":{"kind":"gauge","name":"Rainbow Bridge","noaa":"8770520","src":"NOAA CO-OPS"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-94.114347,30.156878]},
+ "properties":{"kind":"analysis","name":"Neches River Saltwater Barrier",
+  "operator":"Lower Neches Valley Authority","src":"USGS site 08041780",
+  "drivers":{
+    "harvey":{"t":"2 Sep 2017 04:06","coastal":3,"fluvial":97,"pluvial":0},
+    "ike":{"t":"14 Sep 2008 12:54","coastal":78,"fluvial":13,"pluvial":9},
+    "rita":{"t":"24 Sep 2005 18:48","coastal":55,"fluvial":35,"pluvial":10}}}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-94.061066,30.063425]},
+ "properties":{"kind":"analysis","name":"North Regional Treatment Plant",
+  "operator":"Lower Neches Valley Authority","src":"EPA ECHO / FRS",
+  "drivers":{
+    "harvey":{"t":"2 Sep 2017 19:54","coastal":14,"fluvial":60,"pluvial":26},
+    "ike":{"t":"13 Sep 2008 19:18","coastal":55,"fluvial":18,"pluvial":27},
+    "rita":{"t":"25 Sep 2005 12:00","coastal":30,"fluvial":30,"pluvial":40}}}}
+]
+}

@@ -161,6 +161,7 @@
     <label class="chk"><input type="checkbox" id="engRefinery" checked> <span class="dot" style="background:#7c3aed"></span> Refineries</label>
     <label class="chk"><input type="checkbox" id="engPolpump" checked> <span class="dot" style="background:#b91c1c"></span> Petroleum pump stations</label>
     <label class="chk"><input type="checkbox" id="engOrphanwell"> <span class="dot" style="background:#57534e"></span> Orphan wells</label>
+    <label class="chk"><input type="checkbox" id="pubPoints" checked> <span class="dot" style="background:#0f766e"></span> Gauges &amp; published analysis</label>
     <div style="font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.45">Click any site for its peak flood depth in every storm.</div>
   </div>
   <div class="grp">
@@ -680,6 +681,90 @@ Object.keys(ENGDEF).forEach(k=>{
   el(ENGDEF[k].cb).onchange=e=>{ e.target.checked?engLayers[k].addTo(map):map.removeLayer(engLayers[k]); };
 });
 
+/* ---------------- gauges and published analysis points ----------------
+   These five markers are NOT outputs of this map. They are where the published
+   compound-flood model (Maymandi, Hummel & Zhang 2022; Maymandi 2023) was checked
+   against observations, and the two LNVA sites where that study decomposed which
+   forcing actually drove the flooding. They exist to answer two questions this map
+   otherwise cannot: "has any of this been validated?" and "what floods this site?".
+   Coordinates are surveyed, not taken from our facility list -- the Neches River
+   Saltwater Barrier (USGS 08041780) sits ~8 km from the EPA-listed LNVA office,
+   and attaching the published numbers to the wrong dot would have been worse than
+   not showing them. */
+const pubLayer=L.layerGroup();
+const PUBSTAT={  // Maymandi 2023 Table 2.2 -- RMSE (m), AVERAGED over all three gauges
+  harvey:{compound:0.09,coastal:0.30},
+  ike:   {compound:0.15,coastal:0.14},
+  rita:  {compound:0.10,coastal:0.10}
+};
+function pubIcon(kind){
+  const teal='#0f766e', s=kind==='gauge'?17:19;
+  const inner = kind==='gauge'
+    ? '<path d="M10 5.6v8.8M6.6 8.2h6.8M6.6 11.4h6.8" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>'
+    : '<circle cx="10" cy="10" r="3.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="10" cy="10" r="1.1" fill="#fff"/>';
+  return L.divIcon({className:'fac-icon',iconSize:[s,s],iconAnchor:[s/2,s/2],popupAnchor:[0,-s/2-1],
+    html:`<svg width="${s}" height="${s}" viewBox="0 0 20 20">
+      <rect x="1.5" y="1.5" width="17" height="17" rx="8.5" fill="${teal}" stroke="#fff" stroke-width="1.8"/>
+      ${inner}</svg>`});
+}
+function pubPopup(p){
+  if(p.kind==='gauge'){
+    const rows=EVENTS.map(k=>{
+      const s=PUBSTAT[k], better=s.compound<=s.coastal;
+      return `<tr><td style="font-weight:600">${EVNAME[k].split(' ')[0]}</td>
+        <td style="text-align:right${better?';color:#0f766e;font-weight:600':''}">${s.compound.toFixed(2)}</td>
+        <td style="text-align:right">${s.coastal.toFixed(2)}</td></tr>`;
+    }).join('');
+    return `<div class="fac-pop"><b>${p.name}</b><br>
+      <span style="color:#667">NOAA tide gauge ${p.noaa}</span>
+      <div style="margin-top:7px;font-size:12.5px;color:#39424f">One of the three gauges used to
+        check the <b>published</b> compound-flood model for these same three storms.</div>
+      <table class="fac-tbl" style="margin-top:6px">
+        <tr><th></th><th style="text-align:right">compound</th><th style="text-align:right">surge only</th></tr>
+        ${rows}</table>
+      <div class="fac-src">Average error against observed water level, in metres — lower is better.
+        <b>These are averaged across all three gauges, not this one alone.</b> Note that adding
+        rivers and rainfall helps decisively only for Harvey; for Ike and Rita a surge-only model
+        does just as well. Source: Maymandi (2023), Table 2.2.<br>
+        Station: <a href="https://tidesandcurrents.noaa.gov/stationhome.html?id=${p.noaa}"
+        target="_blank" rel="noopener">NOAA CO-OPS ${p.noaa}</a></div></div>`;
+  }
+  const rows=EVENTS.map(k=>{
+    const d=p.drivers[k]; if(!d) return '';
+    const hi=Math.max(d.coastal,d.fluvial,d.pluvial);
+    const c=v=>`<td style="text-align:right${v===hi?';font-weight:700;color:#b42318':''}">${v}%</td>`;
+    return `<tr><td style="font-weight:600">${EVNAME[k].split(' ')[0]}</td>
+      <td style="font-size:11px;color:#667">${d.t}</td>${c(d.coastal)}${c(d.fluvial)}${c(d.pluvial)}</tr>`;
+  }).join('');
+  return `<div class="fac-pop"><b>${p.name}</b><br>
+    <span style="color:#667">${p.operator||''}</span>
+    <div style="margin-top:7px;font-size:12.5px;color:#39424f">What actually drove the flooding
+      here, from the <b>published</b> compound model — not from this map's runs.</div>
+    <table class="fac-tbl" style="margin-top:6px">
+      <tr><th></th><th style="font-size:11px">peak</th><th style="text-align:right">surge</th>
+          <th style="text-align:right">river</th><th style="text-align:right">rain</th></tr>
+      ${rows}</table>
+    <div class="fac-src">Share of the peak water level contributed by each driver, and when that
+      peak occurred. <b>Harvey at the Saltwater Barrier is 97% river water, days after the surge —
+      which is exactly what this map cannot show.</b> Ike and Rita peak at the surge instead.
+      Source: Maymandi (2023), Table 2.3. Location: ${p.src}.</div></div>`;
+}
+function loadPublished(){
+  return fetch('data/published_points.geojson',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(gj=>{
+    if(!gj) return;
+    gj.features.forEach(f=>{
+      const p=f.properties, [lon,lat]=f.geometry.coordinates;
+      L.marker([lat,lon],{pane:'facs',icon:pubIcon(p.kind),riseOnHover:true})
+       .bindPopup(pubPopup(p),{maxWidth:360,minWidth:300})
+       .bindTooltip(p.kind==='gauge'?`${p.name} — NOAA gauge`:p.name,
+                    {direction:'top',offset:[0,-12]})
+       .addTo(pubLayer);
+    });
+    if(el('pubPoints').checked) pubLayer.addTo(map);
+  }).catch(()=>{});
+}
+el('pubPoints').onchange=e=>{ e.target.checked?pubLayer.addTo(map):map.removeLayer(pubLayer); };
+
 /* ---------------- summary charts ---------------- */
 let TS=null;
 function fmtT(t){ return t?String(t).slice(5,13).replace(' ','  ')+'h':''; }
@@ -787,6 +872,19 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
   <p>Crude oil and natural gas pipelines, water and wastewater treatment plants and pumping stations
      are the systems that keep energy and water flowing. The point of the map is to see which of them
      sit where the water goes.</p>
+  <p>The stakes here are national as well as local: Jefferson and Orange Counties account for about
+     <b>11% of US petrochemical employment</b>. And the failure this project exists to prevent has
+     already happened once — during <b>Harvey, the Lower Neches Valley Authority's pumping stations
+     flooded and Beaumont went without a water supply for twelve days</b>. Texas Division of
+     Emergency Management figures put the damage to water-control facilities overwhelmingly in
+     Jefferson County (about <b>$6.24 million</b>, against $532,000 in Orange and $33,000 in Hardin).
+     Under <b>Ike</b>, surge pushed salt water up the Neches; under <b>Tropical Storm Imelda</b> in
+     2019, much of Beaumont went under. The measures being weighed in response — flood-proofing the
+     pumping stations, an on-channel reservoir, extra treatment capacity for Beaumont — are the
+     reason it matters which sites the water actually reaches.</p>
+  <p style="font-size:12px;color:#8a94a1">Imelda is not on this map. The three storms modelled here
+     are Harvey, Rita and Ike; Imelda (2019) caused severe flooding in the same area but has not been
+     simulated in this project.</p>
 
   <h5 style="color:#92400e">Important limits — please read</h5>
   <p style="background:rgba(180,83,9,.08);border-left:3px solid #b45309;padding:9px 11px;border-radius:0 8px 8px 0">
@@ -844,10 +942,30 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
     <li>The future scenario re-runs the same storm with storm parameters adjusted for a
         warmer climate; it does not say how likely that storm is.</li>
   </ul>
-  <p>For what these storms did in reality, including rainfall and river flooding, see
-     Maymandi, Hummel &amp; Zhang (2022), <i>Water Resources Research</i> 58(12) —
-     the compound-flood modelling for this same estuary. Facility pop-ups show its
-     results next to ours.</p>
+  <h5>Where this comes from</h5>
+  <p>For what these storms did in reality — including the rainfall and river water this map leaves
+     out — the compound-flood modelling for this same estuary is published and freely readable.
+     Facility pop-ups show its results next to ours.</p>
+  <ul style="font-size:12.5px">
+    <li>Maymandi, Hummel &amp; Zhang (2022), <b>Compound coastal, fluvial, and pluvial flooding
+        during historical hurricane events in the Sabine–Neches Estuary, Texas</b>.
+        <i>Water Resources Research</i> 58(12), e2022WR033144.
+        <a href="https://doi.org/10.1029/2022WR033144" target="_blank" rel="noopener">doi</a> ·
+        <a href="https://repository.library.noaa.gov/view/noaa/48940" target="_blank" rel="noopener">free full text</a> ·
+        <a href="https://doi.org/10.5281/zenodo.7213729" target="_blank" rel="noopener">model data</a></li>
+    <li>Maymandi (2023), <b>Compound Flood Modeling of Tropical Cyclone Events in Coastal Bays and
+        Estuaries</b>. PhD dissertation, UT Arlington — the fullest account, including the future-climate
+        scenarios.
+        <a href="https://mavmatrix.uta.edu/civilengineering_dissertations/494" target="_blank" rel="noopener">open access</a></li>
+    <li>Maymandi &amp; Hummel (2024), <b>Effect of Sea-Level Rise on Hurricane-Induced Compound
+        Flooding and Economic Damages</b>. World Environmental &amp; Water Resources Congress, 71–78.
+        <a href="https://doi.org/10.1061/9780784485477.006" target="_blank" rel="noopener">doi</a></li>
+    <li>Choi, Zhang, Qian &amp; Hummel (2024), <b>Reassessing the Economic Impacts of Hurricane Harvey
+        on Texas</b>. <i>Natural Hazards</i> (in review).</li>
+  </ul>
+  <p style="font-size:12.5px">This work is part of a NOAA-funded project (Climate Program Office,
+     grant NA19OAR4310347) with the Lower Neches Valley Authority, the City of Beaumont, Jefferson
+     and Orange Counties, the Texas Water Development Board and Texas Sea Grant.</p>
   <p style="color:#98a1ac;font-size:11.5px">Model: Delft3D Flexible Mesh (Deltares), forced by
      WRF-derived wind and pressure fields. Facility locations: EPA ECHO / FRS and OpenStreetMap.
      Pipelines: U.S. Energy Information Administration Energy Atlas. Facility symbols: Temaki
@@ -958,6 +1076,7 @@ async function loadOne(evk,sc,v){
   try{ TS=await (await fetch('data/timeseries.json',{cache:'no-store'})).json(); }catch(e){ TS=null; }
   await loadFacilities();
   await loadEnergy();
+  await loadPublished();
   el('mode').textContent='LIVE';
   updateBanner();
   setScenTitles();
