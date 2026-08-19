@@ -811,12 +811,18 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
         the pop-ups, not in the animation. Extending mattered enormously for Ike — facilities the
         stopped run showed bone dry reach 2.5 m — and barely at all for Rita, which had already
         passed landfall.</li>
-    <li><b>The bigger gap is at the other end.</b> In this estuary the worst flooding is not the
-        surge; it is river and rainfall water arriving <i>days later</i> — around 2 Sep for Harvey,
-        15 Sep for Ike, 30 Sep for Rita. Every simulation here ends before that peak, whether or not
-        it was extended.</li>
-    <li>The <b>Harvey</b> run covers the right week and was never truncated, but without
-        rainfall it misses the flooding that actually happened.</li>
+    <li><b>For Harvey, the bigger gap is at the other end.</b> Harvey's water here peaked in the
+        rivers and in Sabine Lake on <b>4 September</b> — days after the surge had passed — and at
+        the Neches River Saltwater Barrier that peak was <b>97% river water</b>. Our Harvey window
+        closes on 30 August, so this map misses Harvey's flood peak entirely, and being surge-only
+        it could not have reproduced it in any case.</li>
+    <li><b>Ike and Rita are not the same story.</b> Published modelling of these same three storms
+        finds that Ike's and Rita's flooding was driven by <i>storm surge</i>, with the river
+        contributing little — no more than 10% for Rita. So the late river crest that dominates
+        Harvey does not dominate them. Rita's simulation does reach its flood peak; Ike's stops
+        about 14 hours short of the surge that caused its.</li>
+    <li>The <b>Harvey</b> run was never truncated — it covers the week it was set up to cover.
+        Its problem is the missing rainfall and river water, not a short window.</li>
     <li><b>Harvey, future climate: more land floods, and it floods deeper.</b> 9% of the land
         here goes under water instead of 5%, and the deepest water on land rises from 0.56 m
         to 0.71 m. Almost nowhere gets drier. That is the result to take from the &Delta; layer.</li>
@@ -848,14 +854,21 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
      (CC0). Built by the UTA Hydromet group.</p>`;
 
 /* ---------------- standing caveat banner ----------------
-   These runs are wind/pressure-only, Ike stops before the storm reaches land, and
-   all three end days before this estuary's real (river-driven) flood peak. That has
-   to be on screen, not buried in a panel.
-   Revised 19 Aug 2026 with the +17 h clock correction: Rita was never truncated —
-   its run passes landfall by ~9 h — so its caveat now names the real gap instead. */
+   These runs are wind/pressure-only. That has to be on screen, not buried in a panel.
+   Per-storm the gap differs, and the caveats must NOT be generalised across the three:
+     Harvey - flood peak is 4 Sep, fluvial-dominant (97% at the Saltwater Barrier),
+              days after our window closes. Wrong mechanism AND wrong window.
+     Ike    - surge-driven; our run stops ~14 h before landfall, so it misses its own
+              peak. Fixed by the extended re-run (facility depths only so far).
+     Rita   - surge-driven and our run DOES reach its peak. Rainfall is the gap here,
+              contributing up to 40% at the North Regional Treatment Plant.
+   Corrected 19 Aug 2026: an earlier version of this file claimed all three end days
+   before a river-driven peak. That is true of Harvey ONLY - Maymandi (2023) Ch. 2
+   finds the riverine influence negligible for Ike and Rita (max 10% for Rita).
+   See reference-maymandi-dissertation in project memory. */
 const EV_CAVEAT={
-  harvey:"Harvey's flooding here was mostly <b>rainfall</b>, which these runs do not model.",
-  rita:  "The Rita layers cover landfall, but end <b>days before</b> the river-driven flood peak.",
+  harvey:"Harvey's flooding here came from <b>rainfall and river water</b>, days after the surge &mdash; neither is modelled.",
+  rita:  "Rita's flooding was <b>surge-driven</b> and these layers do reach its peak &mdash; but the rainfall that fell with it is not modelled.",
   ike:   "The animated Ike layers still stop <b>~14 h before landfall</b>; facility depths use a re-run that goes through it."
 };
 /* ---------------- scenario button tooltips ----------------
