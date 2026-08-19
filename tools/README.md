@@ -34,7 +34,8 @@ A pass means the map is internally *consistent*. It cannot tell you the map is
 | `facility_exposure.py` | peak depth at each facility from the overland geojsons |
 | `facility_exposure_published.py` | the same from the published compound rasters |
 | `merge_extended_exposure.py` | merges the extended re-run depths computed on Alph |
-| `domain_timeseries.py` | builds `data/timeseries.json` for the summary charts |
+| `domain_timeseries.py` | **SUPERSEDED 2026-08-19 — do not run.** Built `data/timeseries.json` from the shipped tiles, so the charts inherited the tiles' vmax clipping and 6-hourly cadence. Rebuild instead with `value_tiles.py --step-hours 1 --stats-out` on Alph, then shift the timestamps +17 h |
+| `relabel_forcing_clock_17h.py` | shifts every displayed timestamp +17 h; run on any freshly generated manifest, which comes off the model's 17-h-early clock |
 
 Paths are absolute to `~/Claude/Projects/USCRP Hurricane Maps/…`; adjust if the
 project moves.

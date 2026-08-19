@@ -1,5 +1,25 @@
 #!/usr/bin/env python3
-"""Precompute domain-wide time series for every event x scenario x variable.
+"""SUPERSEDED 2026-08-19 — DO NOT RUN THIS TO REBUILD data/timeseries.json.
+
+Reading the shipped tiles made the summary charts inherit two defects the
+tiles have and the model does not: the 8-bit vmax ceiling (which clipped
+Rita's rise at 3 m and reported its climate signal as +0.09 m instead of
++1.34 m) and the 6-hourly display cadence (which missed Rita historical's
+true peak entirely, 2.89 m sampled against 3.86 m hourly).
+
+timeseries.json is now built on Alph, straight from the model output, by
+  value_tiles.py --vars depth,rise,wind --step-hours 1 --stats-out <file>
+one file per run, assembled and shifted +17 h locally. Same grid, same trim
+mask, same thresholds — so the spatial definitions are unchanged — but every
+model hour and no quantisation.
+
+Kept for reference, and because it still documents the tile encoding. If you
+run it, it will silently overwrite the good file with 6-hourly clipped
+numbers. See project-rita-rise-ceiling-2026-08-19 in project memory.
+
+--- original docstring ---
+
+Precompute domain-wide time series for every event x scenario x variable.
 
 Reads the exact-value data tiles that already ship with the web app
 (data/frames/<ev>_<scen>/<var>_data/frame_NNN.png, 8-bit LA, value =

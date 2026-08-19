@@ -717,7 +717,7 @@ function buildSummary(){
   const t0=TS&&TS[ev]&&TS[ev].historical&&TS[ev].historical.rise?TS[ev].historical.rise.t:null;
   if(!TS||!TS[ev]){ c.innerHTML='<button class="close" data-close="summary">&times;</button><h3>Summary charts</h3><p>Time-series summary is not available.</p>'; return; }
   const H=TS[ev].historical||{}, F=TS[ev].future||{};
-  const span=t0?`${fmtT(t0[0])} &rarr; ${fmtT(t0[t0.length-1])} UTC, 6-hourly`:'';
+  const span=t0?`${fmtT(t0[0])} &rarr; ${fmtT(t0[t0.length-1])} UTC, every model hour`:'';
   const warn=TS[ev]._warn?`<p style="color:#92400e;font-size:12.5px"><b>Note:</b> ${Object.values(TS[ev]._warn)[0]} &mdash; the two lines cover slightly different lengths of time.</p>`:'';
   const prov=ev==='harvey'?'<span class="tag">future run ends 17 h earlier</span>':'';
   const pct=v=>Math.round(v*100)+'%';
@@ -824,13 +824,17 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
         rather than 30 Aug 17:00 — because the weather data driving it stops there. The &Delta;
         layer compares only the period both runs cover, so the two sides are measured over the
         same hours.</li>
-    <li>On <b>wind</b>: the warmer-climate storm is the stronger one, with its peak rising from
-        36 to 42 m/s across the full model domain. But its track shifts, so inside the area
-        mapped here the peak comes out about 3% <i>lower</i> (25.4 against 26.2 m/s). One pair
-        of runs cannot resolve a difference that small — read it as no change, and do not read
-        it as a calmer storm.</li>
+    <li>On <b>wind</b>: the warmer-climate storm is the stronger one across the full model
+        domain, which reaches far out into the Gulf. But its track shifts, so inside the small
+        area mapped here the peak can come out <i>lower</i> — 26.2 to 24.3 m/s for Harvey, 55.1
+        to 52.0 m/s for Rita. That is a peak at one point in one deterministic run, not a
+        climate signal: do not read it as a calmer storm, in either direction.</li>
     <li>It is <b>not a forecast</b> and not a flood-insurance map.</li>
-    <li>Frames are 6 hours apart, so brief peaks between frames are not shown.</li>
+    <li>The <b>animation</b> steps 6 hours at a time, so brief peaks between frames are not
+        drawn on the map. The <b>summary charts do not</b> — since 19 August 2026 they are
+        computed from every hour the model produced, so the peak they report is the model's
+        real peak. Expect the charts to show a higher peak than you can find by dragging the
+        slider; that is the 6-hourly animation missing it, not the chart overstating it.</li>
     <li>The future scenario re-runs the same storm with storm parameters adjusted for a
         warmer climate; it does not say how likely that storm is.</li>
   </ul>
