@@ -803,13 +803,17 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
         arrives inside the animation. <b>Rita does reach its peak</b> — its flooding was surge-driven
         and the run covers it. Both have since been re-run further; those results appear only in the
         facility pop-ups so far, and under Ike they take sites from dry to 2.5 m.</li>
-    <li><b>Harvey, future climate: more land floods, and deeper</b> — 9% of the land instead of 5%,
-        and the deepest water on land rises from 0.56 m to 0.71 m. That is the result to take from
-        the &Delta; layer. Harvey's future run ends 17 h earlier than its historical one, and the
-        &Delta; layer compares only the hours both cover.</li>
+    <li><b>Harvey, future climate: more land floods, and deeper</b> — the share of dry land put
+        under water roughly doubles, from 1.1% to 2.4%, and the deepest water on land rises from
+        0.47 m to 0.71 m. That is the result to take from the &Delta; layer. Harvey's future run
+        ends 17 h earlier than its historical one, and the &Delta; layer compares only the hours
+        both cover.</li>
     <li>On <b>wind</b>, do not read the mapped-area peak as a climate signal. The warmer storm is
-        stronger across the full domain, but its track shifts, so inside this small window the peak
-        can come out <i>lower</i> — Harvey 26.2 to 24.3 m/s, Rita 55.1 to 52.0.</li>
+        stronger <b>across the full model domain</b> for all three storms. But its track shifts, so
+        inside this small window the answer depends on the storm and on how often you sample:
+        Harvey's mapped-area peak comes out <i>lower</i> in the future run (26.2 to 24.3 m/s), while
+        Rita's comes out <i>higher</i> in the layer drawn here (50.3 to 52.1 m/s). One pair of runs
+        cannot resolve differences that small — read the mapped-area peak as no signal at all.</li>
     <li>The <b>animation</b> steps 6 hours and can miss brief peaks; the <b>summary charts</b> use
         every model hour, so expect them to show a higher peak than the slider can find.</li>
     <li>All times were corrected on <b>19 August 2026</b> — the driving weather files were stamped
@@ -819,9 +823,11 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
         say how likely that storm is.</li>
   </ul>
   <p style="color:#98a1ac;font-size:11.5px">Model: Delft3D Flexible Mesh (Deltares), forced by
-     WRF-derived wind and pressure fields. Facility locations: EPA ECHO / FRS and OpenStreetMap.
-     Pipelines: U.S. Energy Information Administration Energy Atlas. Facility symbols: Temaki
-     (CC0). Built by the UTA Hydromet group.</p>`;
+     WRF-derived wind and pressure fields. Water and wastewater sites: EPA ECHO / FRS and
+     OpenStreetMap. Pipelines: U.S. Energy Information Administration Energy Atlas. Refineries:
+     EPA ECHO / FRS locations with EIA capacities. Petroleum pump stations: HIFLD. Orphan wells:
+     Texas Railroad Commission. Facility symbols: Temaki (CC0). Built by the UTA Hydromet
+     group.</p>`;
 
 /* ---------------- standing caveat banner ----------------
    These runs are wind/pressure-only. That has to be on screen, not buried in a panel.
