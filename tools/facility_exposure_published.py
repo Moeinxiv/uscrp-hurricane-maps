@@ -2,7 +2,7 @@
 """Add the lab's PUBLISHED compound-flood depths to facilities.geojson, alongside ours.
 
 Source: Flood-maps/Historical_Storm_Flood_Maps/compound_depth_ft_{Ike,Rita}.tif —
-depth in FEET, almost certainly the output of Maymandi, Hummel & Zhang (2022, WRR
+depth in FEET, almost certainly the output of the 2022 compound-flood study (WRR
 58(12) e2022WR033144), which modelled surge + tides + river discharge + rain-on-grid
 and was validated against NOAA gauges and USGS high-water marks.
 

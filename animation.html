@@ -607,7 +607,7 @@ function facPopup(p){
     ${anyExt?'<span style="color:#175cd3">&#8226;</span> <b>Rita and Ike depths are from re-runs extended to the end of their weather forcing</b> (12 Aug 2026, awaiting review); "was" shows what the original, shorter run reported. Extending mattered for Ike, which had stopped ~14 h before landfall; Rita\'s original run had already passed landfall, so it barely moved. The <i>animated layers on this map are still the original shorter runs</i> — only these numbers are updated.<br>':''}
     All of these columns are <b>surge only</b>: wind and air pressure, with <b>no rainfall,
     no river inflow and no tides</b>, so they still understate flooding on land.
-    ${anyPub?'The <b>published</b> column is the peer-reviewed compound-flood result for the historical storm (Maymandi, Hummel &amp; Zhang, 2022), which does include rainfall and rivers.':''}
+    ${anyPub?'The <b>published</b> column is the peer-reviewed compound-flood result for the historical storm (<i>Water Resources Research</i> 58(12), 2022), which does include rainfall and rivers.':''}
     <br><span style="color:#b45309">*</span> Harvey was never truncated; its future run ends 17 h earlier than its historical one, where the driving weather data stops.
     <br>Site location: ${p.src}</div>`;
   return `<div class="fac-pop"><b>${p.name}</b><br><span style="color:#667">${sub}</span>
@@ -833,7 +833,7 @@ el('about').innerHTML=`<button class="close" data-close="about">&times;</button>
      Rita   - surge-driven and our run DOES reach its peak. Rainfall is the gap here,
               contributing up to 40% at the North Regional Treatment Plant.
    Corrected 19 Aug 2026: an earlier version of this file claimed all three end days
-   before a river-driven peak. That is true of Harvey ONLY - Maymandi (2023) Ch. 2
+   before a river-driven peak. That is true of Harvey ONLY - the 2023 UT Arlington dissertation, Ch. 2,
    finds the riverine influence negligible for Ike and Rita (max 10% for Rita).
    See reference-maymandi-dissertation in project memory. */
 const EV_CAVEAT={
